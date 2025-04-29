@@ -4,5 +4,6 @@
 #include <raylib.h>
 
 #define SCREEN_SIZE (Vector2){512, 512}
+#define FRAME 0.016
 
 #endif

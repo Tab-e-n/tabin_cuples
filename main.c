@@ -9,15 +9,24 @@ int main(void)
 	SetTargetFPS(60);
 	SetExitKey(KEY_NULL);
 
-	Unit unit = (Unit){0};
-	unit.position = (Vector2){256, 256};
+	Unit unit = UnitInit();
+	unit.position = (Vector2){16, 256};
+	unit.side = 1;
+
+	Unit unit2 = UnitInit();
+	unit2.position = (Vector2){496, 256};
+	unit2.side = -1;
 
 	while(!WindowShouldClose())
 	{
 
+		UnitProcess(&unit);
+		UnitProcess(&unit2);
+
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
 		DrawUnitDebug(unit);
+		DrawUnitDebug(unit2);
 		EndDrawing();
 
 	}
