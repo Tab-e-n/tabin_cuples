@@ -1,5 +1,6 @@
 #include <raylib.h>
 #include "cuplib.h"
+#include "units.h"
 
 int main(void)
 {
@@ -8,12 +9,15 @@ int main(void)
 	SetTargetFPS(60);
 	SetExitKey(KEY_NULL);
 
+	Unit unit = (Unit){0};
+	unit.position = (Vector2){256, 256};
+
 	while(!WindowShouldClose())
 	{
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		DrawText("Hello!", 0, 0, 32, BLACK);
+		DrawUnitDebug(unit);
 		EndDrawing();
 
 	}
