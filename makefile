@@ -1,11 +1,11 @@
-cuples : main.o cuplib.o
-	cc -o cuples main.o cuplib.o
+cuples.out : main.o cuplib.o
+	gcc -o cuples.out main.o cuplib.o -lraylib
 
 main.o : main.c cuplib.h
-	cc -c main.c -lraylib
+	gcc -c main.c -lraylib
 
 cuplib.o : cuplib.c
-	cc -c cuplib.c -lraylib
+	gcc -c cuplib.c -lraylib
 
 clean :
-	rm cuples main.o cuplib.o
+	rm cuples.out main.o cuplib.o
