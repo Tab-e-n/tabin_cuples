@@ -1,0 +1,14 @@
+
+Multi-cup unit logic
+Making units
+Base
+Worker units
+
+Menu
+Levels
+
+Random cooldown time variance
+
+Buffs?
+Damaged units become slower?
+

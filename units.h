@@ -16,6 +16,7 @@ typedef enum UnitState
 	STATE_COOLDOWN,
 	STATE_ATTACK_START,
 	STATE_ATTACK_END,
+	STATE_DEATH,
 } UnitState;
 
 typedef struct Cup
@@ -50,9 +51,12 @@ Rectangle UnitAttackArea(Unit unit);
 Rectangle CupHitbox(Unit unit, int cup_id);
 
 Unit UnitInit(void);
+
 void UnitMove(Unit* unit);
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
+void UnitAttack(Unit* unit, Unit units[MAX_UNITS]);
 void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
+void UnitDamage(Unit* unit);
 
 void DrawUnitDebug(Unit unit);
 

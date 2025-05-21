@@ -6,7 +6,7 @@ Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
 	area.width = CUP_SIZE * (unit.area + unit.range);
-	area.height = CUP_SIZE * unit.area;
+	area.height = CUP_SIZE;
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
@@ -20,7 +20,7 @@ Rectangle UnitAttackArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
 	area.width = CUP_SIZE * unit.area;
-	area.height = CUP_SIZE * unit.area;
+	area.height = CUP_SIZE;
 
 	float offset = unit.enemy_distance;
 	if(offset > unit.range)
@@ -112,6 +112,26 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 	return false;
 }
 
+void UnitAttack(Unit* unit, Unit units[MAX_UNITS])
+{
+	Rectangle hurtbox = UnitAttackArea(*unit);
+	for(int i = 0; i < MAX_UNITS; i++) 
+	{
+		Unit other = units[i];
+		for(int j = 0; j < CUPS_PER_UNIT; j++)
+		{
+			if(other.cups[j].active)
+			{
+				Rectangle hitbox = CupHitbox(other, j);
+				if(CheckCollisionRecs(hurtbox, hitbox))
+				{
+					units[i].incoming += unit->damage;
+				}
+			}
+		}
+	}
+}
+
 void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 {
 	if(unit->alive == 0)
@@ -137,8 +157,13 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 		// STATE END
 		if(unit->state == STATE_ATTACK_START)
 		{
-			Rectangle hurt_box = UnitAttackArea(*unit);
-			// TODO: Check for cups in attack area, damage all cups.
+			//TraceLog(LOG_INFO, "Attack");
+			UnitAttack(unit, enemis);
+		}
+		if(unit->state == STATE_DEATH)
+		{
+			unit->state = STATE_NULL;
+			unit->alive = 0;
 		}
 		// CHANGE STATE
 		switch(unit->state)
@@ -183,6 +208,23 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 				break;
 		}
 	}
+}
+
+void UnitDamage(Unit* unit)
+{
+	if(unit->alive == 0 || unit->health <= 0)
+	{
+		unit->incoming = 0;
+		return;
+	}
+	unit->health -= unit->incoming;
+	unit->incoming = 0;
+	if(unit->health <= 0)
+	{
+		unit->state = STATE_DEATH;
+		unit->state_time = 1.0;
+	}
+	//TraceLog(LOG_INFO, "%i", unit->health);
 }
 
 void DrawUnitDebug(Unit unit)

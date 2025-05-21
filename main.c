@@ -30,6 +30,11 @@ int main(void)
 			UnitProcess(&units_left[i], units_right, units_left);
 			UnitProcess(&units_right[i], units_left, units_right);
 		}
+		for(int i = 0; i < MAX_UNITS; i++)
+		{
+			UnitDamage(&units_left[i]);
+			UnitDamage(&units_right[i]);
+		}
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
