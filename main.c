@@ -9,24 +9,35 @@ int main(void)
 	SetTargetFPS(60);
 	SetExitKey(KEY_NULL);
 
-	Unit unit = UnitInit();
-	unit.position = (Vector2){16, 256};
-	unit.side = 1;
+	Unit units_left[MAX_UNITS] = {0};
+	Unit units_right[MAX_UNITS] = {0};
 
-	Unit unit2 = UnitInit();
-	unit2.position = (Vector2){496, 256};
-	unit2.side = -1;
+	units_left[0] = UnitInit();
+	units_left[0].position = (Vector2){16, 256};
+	units_left[0].side = 1;
+	units_left[0].state = STATE_MOVE;
+
+	units_right[0] = UnitInit();
+	units_right[0].position = (Vector2){496, 256};
+	units_right[0].side = -1;
+	units_right[0].state = STATE_MOVE;
 
 	while(!WindowShouldClose())
 	{
 
-		UnitProcess(&unit);
-		UnitProcess(&unit2);
+		for(int i = 0; i < MAX_UNITS; i++)
+		{
+			UnitProcess(&units_left[i], units_right, units_left);
+			UnitProcess(&units_right[i], units_left, units_right);
+		}
 
 		BeginDrawing();
 		ClearBackground(RAYWHITE);
-		DrawUnitDebug(unit);
-		DrawUnitDebug(unit2);
+		for(int i = 0; i < MAX_UNITS; i++)
+		{
+			DrawUnitDebug(units_left[i]);
+			DrawUnitDebug(units_right[i]);
+		}
 		EndDrawing();
 
 	}

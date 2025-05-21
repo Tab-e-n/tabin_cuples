@@ -5,8 +5,8 @@
 Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE;
-	area.height = CUP_SIZE * 5;
+	area.width = CUP_SIZE * (unit.area + unit.range);
+	area.height = CUP_SIZE * unit.area;
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
@@ -19,19 +19,43 @@ Rectangle UnitDetectionArea(Unit unit)
 Rectangle UnitAttackArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE;
-	area.height = CUP_SIZE;
+	area.width = CUP_SIZE * unit.area;
+	area.height = CUP_SIZE * unit.area;
+
+	float offset = unit.enemy_distance;
+	if(offset > unit.range)
+	{
+		offset = unit.range; 
+	}
+	offset -= 1.0;
+	if(offset < 0.0)
+	{
+		offset = 0.0;
+	}
+
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width * 1.5;
+		area.x -= area.width * 1.5 + CUP_SIZE * offset;
 	}
 	else
 	{
-		area.x += area.width * 0.5;
+		area.x += area.width * 0.5 + CUP_SIZE * offset;
 	}
 	area.y = unit.position.y - area.height;
 	return area;
+}
+
+Rectangle CupHitbox(Unit unit, int cup_id)
+{
+	Cup cup = unit.cups[cup_id];
+	Vector2 offset = cup.offset;
+	Rectangle hitbox;
+	hitbox.x = unit.position.x - CUP_SIZE * 0.5 + offset.x;
+	hitbox.y = unit.position.y - CUP_SIZE + offset.y;
+	hitbox.width = CUP_SIZE;
+	hitbox.height = CUP_SIZE;
+	return hitbox;
 }
 
 Unit UnitInit(void)
@@ -39,13 +63,24 @@ Unit UnitInit(void)
 	Unit unit = (Unit){0};
 	unit.position = (Vector2){0, 0};
 	unit.type = 0;
+	unit.health = 8;
+	unit.damage = 1;
+	unit.incoming = 0;
 	unit.state = STATE_NULL;
 	unit.state_time = 1.0;
-	unit.health = 8.0;
-	unit.damage = 1.0;
 	unit.cooldown = 1.0;
-	unit.speed = 8.0;
+	unit.speed = 16.0;
+	unit.area = 1.0;
+	unit.range = 0.0;
+	unit.enemy_distance = 0.0;
 	unit.side = 0;
+	unit.alive = 1;
+
+	for(int i = 0; i < CUPS_PER_UNIT; i++)
+	{
+		unit.cups[i] = (Cup){0};
+	}
+	unit.cups[0].active = true;
 
 	return unit;
 }
@@ -55,8 +90,34 @@ void UnitMove(Unit* unit)
 	unit->position.x += unit->side * FRAME * unit->speed;
 }
 
-void UnitProcess(Unit* unit)
+bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 {
+	Rectangle detect_range = UnitDetectionArea(*unit);
+	for(int i = 0; i < MAX_UNITS; i++) 
+	{
+		Unit other = units[i];
+		for(int j = 0; j < CUPS_PER_UNIT; j++)
+		{
+			if(other.cups[j].active)
+			{
+				Rectangle hitbox = CupHitbox(other, j);
+				if(CheckCollisionRecs(detect_range, hitbox))
+				{
+					unit->enemy_distance = absf(unit->position.x - other.position.x);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
+{
+	if(unit->alive == 0)
+	{
+		return;
+	}
 	switch(unit->state)
 	{
 		case STATE_MOVE:
@@ -73,6 +134,13 @@ void UnitProcess(Unit* unit)
 	unit->state_time -= FRAME;
 	if(unit->state_time <= 0.0)
 	{
+		// STATE END
+		if(unit->state == STATE_ATTACK_START)
+		{
+			Rectangle hurt_box = UnitAttackArea(*unit);
+			// TODO: Check for cups in attack area, damage all cups.
+		}
+		// CHANGE STATE
 		switch(unit->state)
 		{
 			case STATE_MOVE:
@@ -88,13 +156,13 @@ void UnitProcess(Unit* unit)
 				unit->state = STATE_COOLDOWN;
 				break;
 		}
+		// STATE START
 		if(unit->state == STATE_MOVE)
 		{
-			// TODO: Check for cups in detection range, attack if there are.
-		}
-		if(unit->state == STATE_ATTACK_END)
-		{
-			// TODO: Check for cups in attack area, damage all cups.
+			if(UnitDetectionRangeCheck(unit, enemis))
+			{
+				unit->state = STATE_ATTACK_START;
+			}
 		}
 		switch(unit->state)
 		{
@@ -114,18 +182,24 @@ void UnitProcess(Unit* unit)
 				unit->state_time = 0.25;
 				break;
 		}
-
 	}
 }
 
 void DrawUnitDebug(Unit unit)
 {
+	if(unit.alive == 0)
+	{
+		return;
+	}
 	if(unit.state == STATE_MOVE)
 	{
 		DrawRectangleRec(UnitDetectionArea(unit), PURPLE);
 	}
-	DrawRectangle(unit.position.x - CUP_SIZE * 0.5, unit.position.y - CUP_SIZE, CUP_SIZE, CUP_SIZE, BLACK);
-	if(unit.state == STATE_ATTACK)
+	for(int i = 0; i < CUPS_PER_UNIT; i++)
+	{
+		DrawRectangleRec(CupHitbox(unit, i), BLACK);
+	}
+	if(unit.state == STATE_ATTACK_START)
 	{
 		DrawRectangleRec(UnitAttackArea(unit), RED);
 	}

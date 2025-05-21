@@ -29,23 +29,30 @@ typedef struct Cup
 typedef struct Unit
 {
 	Vector2 position;
-	int type;
+	int type,
+	    health,
+	    damage,
+	    incoming;
 	UnitState state;
 	float state_time,
-	      health,
-	      damage,
 	      cooldown,
-	      speed;
-	char side;
+	      speed,
+	      area,
+	      range,
+	      enemy_distance;
+	char side,
+	     alive;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
 
 Rectangle UnitDetectionArea(Unit unit);
 Rectangle UnitAttackArea(Unit unit);
+Rectangle CupHitbox(Unit unit, int cup_id);
 
 Unit UnitInit(void);
 void UnitMove(Unit* unit);
-void UnitProcess(Unit* unit);
+bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
+void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
 
 void DrawUnitDebug(Unit unit);
 
