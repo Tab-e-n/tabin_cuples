@@ -9,16 +9,26 @@ int main(void)
 	SetTargetFPS(60);
 	SetExitKey(KEY_NULL);
 
+	const Vector2 LEFT_START_POS = (Vector2){16, 256}; 
+	const Vector2 RIGHT_START_POS = (Vector2){496, 256};
+
 	Unit units_left[MAX_UNITS] = {0};
 	Unit units_right[MAX_UNITS] = {0};
 
 	units_left[0] = UnitInit();
-	units_left[0].position = (Vector2){16, 256};
+	units_left[0].position = LEFT_START_POS;
 	units_left[0].side = 1;
 	units_left[0].state = STATE_MOVE;
 
+	units_left[1] = UnitInit();
+	units_left[1].position = LEFT_START_POS;
+	units_left[1].position.x -= 48;
+	units_left[1].side = 1;
+	units_left[1].range = 2.0;
+	units_left[1].state = STATE_MOVE;
+
 	units_right[0] = UnitInit();
-	units_right[0].position = (Vector2){496, 256};
+	units_right[0].position = RIGHT_START_POS;
 	units_right[0].side = -1;
 	units_right[0].state = STATE_MOVE;
 

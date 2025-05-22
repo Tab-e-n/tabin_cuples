@@ -5,7 +5,7 @@
 Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE * (unit.area + unit.range);
+	area.width = CUP_SIZE * (unit.area + maxf(unit.range - 1.0, 0.0));
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
 	if(unit.side < 0)
@@ -71,7 +71,7 @@ Unit UnitInit(void)
 	unit.cooldown = 1.0;
 	unit.speed = 16.0;
 	unit.area = 1.0;
-	unit.range = 0.0;
+	unit.range = 1.0;
 	unit.enemy_distance = 0.0;
 	unit.side = 0;
 	unit.alive = 1;
@@ -96,14 +96,15 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
-		for(int j = 0; j < CUPS_PER_UNIT; j++)
+		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
 			{
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					unit->enemy_distance = absf(unit->position.x - other.position.x);
+					unit->enemy_distance = absf(unit->position.x - other.position.x) / CUP_SIZE;
+					TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
 					return true;
 				}
 			}
@@ -118,7 +119,7 @@ void UnitAttack(Unit* unit, Unit units[MAX_UNITS])
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
-		for(int j = 0; j < CUPS_PER_UNIT; j++)
+		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
 			{
@@ -235,7 +236,7 @@ void DrawUnitDebug(Unit unit)
 	}
 	if(unit.state == STATE_MOVE)
 	{
-		DrawRectangleRec(UnitDetectionArea(unit), PURPLE);
+		DrawRectangleRec(UnitDetectionArea(unit), TRANS_PURPLE);
 	}
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
 	{
@@ -243,6 +244,6 @@ void DrawUnitDebug(Unit unit)
 	}
 	if(unit.state == STATE_ATTACK_START)
 	{
-		DrawRectangleRec(UnitAttackArea(unit), RED);
+		DrawRectangleRec(UnitAttackArea(unit), TRANS_RED);
 	}
 }
