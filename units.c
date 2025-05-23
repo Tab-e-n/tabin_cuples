@@ -5,12 +5,34 @@
 Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE * (unit.area + maxf(unit.range - 1.0, 0.0));
+	area.width = CUP_SIZE * (maxf(unit.range - 1.0, 0.0) + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.5));
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width;
+		area.x -= area.width + CUP_SIZE * 0.5;
+	}
+	else
+	{
+		area.x += CUP_SIZE * 0.5;
+	}
+	area.y = unit.position.y - area.height;
+	return area;
+}
+
+Rectangle UnitFrontArea(Unit unit)
+{
+	Rectangle area = (Rectangle){0};
+	area.width = CUP_SIZE * 0.125;
+	area.height = CUP_SIZE;
+	area.x = unit.position.x;
+	if(unit.side < 0)
+	{
+		area.x -= area.width + CUP_SIZE * 0.5325;
+	}
+	else
+	{
+		area.x += CUP_SIZE * 0.5325;
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -22,25 +44,14 @@ Rectangle UnitAttackArea(Unit unit)
 	area.width = CUP_SIZE * unit.area;
 	area.height = CUP_SIZE;
 
-	float offset = unit.enemy_distance;
-	if(offset > unit.range)
-	{
-		offset = unit.range; 
-	}
-	offset -= 1.0;
-	if(offset < 0.0)
-	{
-		offset = 0.0;
-	}
-
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width * 1.5 + CUP_SIZE * offset;
+		area.x -= area.width * 1.0 + CUP_SIZE * (0.5 + unit.enemy_distance);
 	}
 	else
 	{
-		area.x += area.width * 0.5 + CUP_SIZE * offset;
+		area.x += CUP_SIZE * (0.5 + unit.enemy_distance);
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -103,8 +114,38 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					unit->enemy_distance = absf(unit->position.x - other.position.x) / CUP_SIZE;
-					TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
+					unit->enemy_distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV;
+					if(unit->enemy_distance > unit->range)
+					{
+						unit->enemy_distance = unit->range; 
+					}
+					unit->enemy_distance -= 1.0;
+					if(unit->enemy_distance < 0.0)
+					{
+						unit->enemy_distance = 0.0;
+					}
+					//TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
+					return true;
+				}
+			}
+		}
+	}
+	return false;
+}
+
+bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS])
+{
+	Rectangle detect_range = UnitFrontArea(*unit);
+	for(int i = 0; i < MAX_UNITS; i++) 
+	{
+		Unit other = units[i];
+		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
+		{
+			if(other.cups[j].active)
+			{
+				Rectangle hitbox = CupHitbox(other, j);
+				if(CheckCollisionRecs(detect_range, hitbox))
+				{
 					return true;
 				}
 			}
@@ -169,9 +210,6 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 		// CHANGE STATE
 		switch(unit->state)
 		{
-			case STATE_MOVE:
-				unit->state = STATE_MOVE;
-				break;
 			case STATE_COOLDOWN:
 				unit->state = STATE_MOVE;
 				break;
@@ -182,20 +220,31 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 				unit->state = STATE_COOLDOWN;
 				break;
 		}
-		// STATE START
-		if(unit->state == STATE_MOVE)
+		if(unit->state == STATE_MOVE || unit->state == STATE_IDLE)
 		{
 			if(UnitDetectionRangeCheck(unit, enemis))
 			{
 				unit->state = STATE_ATTACK_START;
 			}
+			else if(UnitFrontCheck(unit, friends))
+			{
+				unit->state = STATE_IDLE;
+			}
+			else
+			{
+				unit->state = STATE_MOVE;
+			}
 		}
+		// STATE START
 		switch(unit->state)
 		{
 			case STATE_NULL:
 				unit->state_time = 1.0;
 				break;
 			case STATE_MOVE:
+				unit->state_time = 0.1;
+				break;
+			case STATE_IDLE:
 				unit->state_time = 0.1;
 				break;
 			case STATE_COOLDOWN:
@@ -234,9 +283,13 @@ void DrawUnitDebug(Unit unit)
 	{
 		return;
 	}
-	if(unit.state == STATE_MOVE)
+	if(unit.state == STATE_MOVE || unit.state == STATE_IDLE)
 	{
 		DrawRectangleRec(UnitDetectionArea(unit), TRANS_PURPLE);
+	}
+	if(unit.state == STATE_IDLE)
+	{
+		DrawRectangleRec(UnitFrontArea(unit), TRANS_BLUE);
 	}
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
 	{

@@ -8,6 +8,7 @@
 #define CUPS_PER_UNIT 5
 
 #define CUP_SIZE 32
+#define CUP_SIZE_INV 0.03125
 
 typedef enum UnitState
 {
@@ -17,6 +18,7 @@ typedef enum UnitState
 	STATE_ATTACK_START,
 	STATE_ATTACK_END,
 	STATE_DEATH,
+	STATE_IDLE,
 } UnitState;
 
 typedef struct Cup
@@ -47,6 +49,7 @@ typedef struct Unit
 } Unit;
 
 Rectangle UnitDetectionArea(Unit unit);
+Rectangle UnitFrontArea(Unit unit);
 Rectangle UnitAttackArea(Unit unit);
 Rectangle CupHitbox(Unit unit, int cup_id);
 
@@ -54,6 +57,7 @@ Unit UnitInit(void);
 
 void UnitMove(Unit* unit);
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
+bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS]);
 void UnitAttack(Unit* unit, Unit units[MAX_UNITS]);
 void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
 void UnitDamage(Unit* unit);

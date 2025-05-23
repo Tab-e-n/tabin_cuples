@@ -24,7 +24,8 @@ int main(void)
 	units_left[1].position = LEFT_START_POS;
 	units_left[1].position.x -= 48;
 	units_left[1].side = 1;
-	units_left[1].range = 2.0;
+	units_left[1].area = 4.0;
+	units_left[1].speed = 32.0;
 	units_left[1].state = STATE_MOVE;
 
 	units_right[0] = UnitInit();
