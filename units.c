@@ -86,6 +86,7 @@ Unit UnitInit(void)
 	unit.enemy_distance = 0.0;
 	unit.side = 0;
 	unit.alive = 1;
+	unit.idle_backup = 0;
 
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
 	{
@@ -96,9 +97,9 @@ Unit UnitInit(void)
 	return unit;
 }
 
-void UnitMove(Unit* unit)
+void UnitMove(Unit* unit, float mult)
 {
-	unit->position.x += unit->side * FRAME * unit->speed;
+	unit->position.x += unit->side * FRAME * unit->speed * mult;
 }
 
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
@@ -139,7 +140,7 @@ bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS])
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
-		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
+		if(other.alive != 0 && other.speed >= unit->speed) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
 			{
@@ -180,10 +181,14 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 	{
 		return;
 	}
+	if(unit->idle_backup >= 10)
+	{
+		UnitMove(unit, -1.0);
+	}
 	switch(unit->state)
 	{
 		case STATE_MOVE:
-			UnitMove(unit);
+			UnitMove(unit, 1.0);
 			break;
 		case STATE_COOLDOWN:
 			break;
@@ -229,6 +234,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 			else if(UnitFrontCheck(unit, friends))
 			{
 				unit->state = STATE_IDLE;
+				unit->idle_backup += 1;
 			}
 			else
 			{
@@ -236,6 +242,10 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 			}
 		}
 		// STATE START
+		if(unit->state != STATE_IDLE)
+		{
+			unit->idle_backup = 0;
+		}
 		switch(unit->state)
 		{
 			case STATE_NULL:

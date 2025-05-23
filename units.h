@@ -44,7 +44,8 @@ typedef struct Unit
 	      range,
 	      enemy_distance;
 	char side,
-	     alive;
+	     alive,
+	     idle_backup;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
 
@@ -55,7 +56,7 @@ Rectangle CupHitbox(Unit unit, int cup_id);
 
 Unit UnitInit(void);
 
-void UnitMove(Unit* unit);
+void UnitMove(Unit* unit, float mult);
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
 bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS]);
 void UnitAttack(Unit* unit, Unit units[MAX_UNITS]);
