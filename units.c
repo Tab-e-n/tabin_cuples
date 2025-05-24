@@ -1,4 +1,5 @@
 #include <raylib.h>
+#include <raymath.h>
 #include "cuplib.h"
 #include "units.h"
 
@@ -10,11 +11,11 @@ Rectangle UnitDetectionArea(Unit unit)
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width + CUP_SIZE * 0.5;
+		area.x -= area.width + CUP_SIZE * (unit.length - 0.5);
 	}
 	else
 	{
-		area.x += CUP_SIZE * 0.5;
+		area.x += CUP_SIZE * (unit.length - 0.5);
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -28,11 +29,11 @@ Rectangle UnitFrontArea(Unit unit)
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width + CUP_SIZE * 0.5325;
+		area.x -= area.width + CUP_SIZE * (unit.length - 0.4675);
 	}
 	else
 	{
-		area.x += CUP_SIZE * 0.5325;
+		area.x += CUP_SIZE * (unit.length - 0.4675);
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -47,11 +48,11 @@ Rectangle UnitAttackArea(Unit unit)
 	area.x = unit.position.x;
 	if(unit.side < 0)
 	{
-		area.x -= area.width * 1.0 + CUP_SIZE * (0.5 + unit.enemy_distance);
+		area.x -= area.width * 1.0 + CUP_SIZE * ((unit.length - 0.5) + unit.enemy_distance);
 	}
 	else
 	{
-		area.x += CUP_SIZE * (0.5 + unit.enemy_distance);
+		area.x += CUP_SIZE * ((unit.length - 0.5) + unit.enemy_distance);
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -61,6 +62,7 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 {
 	Cup cup = unit.cups[cup_id];
 	Vector2 offset = cup.offset;
+	offset = Vector2Scale(offset, (float)unit.side);
 	Rectangle hitbox;
 	hitbox.x = unit.position.x - CUP_SIZE * 0.5 + offset.x;
 	hitbox.y = unit.position.y - CUP_SIZE + offset.y;
@@ -73,7 +75,6 @@ Unit UnitInit(void)
 {
 	Unit unit = (Unit){0};
 	unit.position = (Vector2){0, 0};
-	unit.type = 0;
 	unit.health = 8;
 	unit.damage = 1;
 	unit.incoming = 0;
@@ -83,6 +84,7 @@ Unit UnitInit(void)
 	unit.speed = 16.0;
 	unit.area = 1.0;
 	unit.range = 1.0;
+	unit.length = 1.0;
 	unit.enemy_distance = 0.0;
 	unit.side = 0;
 	unit.alive = 1;
@@ -115,7 +117,7 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					unit->enemy_distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV;
+					unit->enemy_distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV - unit->length + 1.0;
 					if(unit->enemy_distance > unit->range)
 					{
 						unit->enemy_distance = unit->range; 
@@ -303,10 +305,14 @@ void DrawUnitDebug(Unit unit)
 	}
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
 	{
-		DrawRectangleRec(CupHitbox(unit, i), BLACK);
+		if(unit.cups[i].active)
+		{
+			DrawRectangleRec(CupHitbox(unit, i), BLACK);
+		}
 	}
 	if(unit.state == STATE_ATTACK_START)
 	{
 		DrawRectangleRec(UnitAttackArea(unit), TRANS_RED);
 	}
+	DrawPixel(unit.position.x, unit.position.y, GREEN);
 }

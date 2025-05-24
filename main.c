@@ -22,11 +22,13 @@ int main(void)
 
 	units_left[1] = UnitInit();
 	units_left[1].position = LEFT_START_POS;
-	units_left[1].position.x -= 48;
+	units_left[1].position.x -= 80;
 	units_left[1].side = 1;
-	units_left[1].area = 4.0;
+	units_left[1].length = 2.0;
 	units_left[1].speed = 32.0;
 	units_left[1].state = STATE_MOVE;
+	units_left[1].cups[2].active = 1;
+	units_left[1].cups[2].offset.x = 32;
 
 	units_right[0] = UnitInit();
 	units_right[0].position = RIGHT_START_POS;

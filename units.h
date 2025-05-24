@@ -2,6 +2,7 @@
 #define CUPUNITS
 
 #include <raylib.h>
+#include <raymath.h>
 #include "cuplib.h"
 
 #define MAX_UNITS 32
@@ -32,8 +33,7 @@ typedef struct Cup
 typedef struct Unit
 {
 	Vector2 position;
-	int type,
-	    health,
+	int health,
 	    damage,
 	    incoming;
 	UnitState state;
@@ -42,6 +42,7 @@ typedef struct Unit
 	      speed,
 	      area,
 	      range,
+	      length,
 	      enemy_distance;
 	char side,
 	     alive,
