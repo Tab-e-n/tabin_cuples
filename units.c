@@ -65,8 +65,8 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 	offset = Vector2Scale(offset, (float)unit.side);
 	Rectangle hitbox;
 	hitbox.x = unit.position.x - CUP_SIZE * 0.5 + offset.x;
-	hitbox.y = unit.position.y - CUP_SIZE + offset.y;
-	hitbox.width = CUP_SIZE;
+	hitbox.y = unit.position.y - CUP_SIZE - offset.y;
+	hitbox.width = CUP_SIZE * 0.9;
 	hitbox.height = CUP_SIZE;
 	return hitbox;
 }
@@ -76,7 +76,7 @@ Unit UnitInit(void)
 	Unit unit = (Unit){0};
 	unit.position = (Vector2){0, 0};
 	unit.health = 8;
-	unit.damage = 1;
+	unit.damage = 2;
 	unit.incoming = 0;
 	unit.state = STATE_NULL;
 	unit.state_time = 1.0;

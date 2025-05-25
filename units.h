@@ -25,28 +25,28 @@ typedef enum UnitState
 typedef struct Cup
 {
 	bool active;
-	int pattern,
-	    animation;
-	Vector2 offset;
+	int pattern, // What does the cup look like
+	    animation; // What animations should the cup do
+	Vector2 offset; // Values always positive
 } Cup;
 
 typedef struct Unit
 {
 	Vector2 position;
-	int health,
-	    damage,
-	    incoming;
+	int health, // Current health, basic unit has 8 health
+	    damage, // Amount of damage dealt when unit attacks
+	    incoming; // * Damage is dealt after every unit is processed, stored here
 	UnitState state;
-	float state_time,
-	      cooldown,
-	      speed,
-	      area,
-	      range,
-	      length,
-	      enemy_distance;
-	char side,
-	     alive,
-	     idle_backup;
+	float cooldown, // Base cooldown after attacking
+	      speed, // Pixels per frame
+	      area, // The size of the damage area in cups
+	      range, // How many cups far can the unit attack
+	      length, // How many cups long is the unit
+	      state_time, // * Amount of time until the state ends
+	      enemy_distance; // * How far the last detected enemy is, limited by range
+	char side, // 1 (player) or -1 (opponent)
+	     alive, // * Is unit alive and should it be processed
+	     idle_backup; // * When overlaping another unit, backup after standing for too long.
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
 
