@@ -22,6 +22,14 @@ typedef enum UnitState
 	STATE_IDLE,
 } UnitState;
 
+typedef enum UnitType
+{
+	UNIT_BASIC,
+	UNIT_TALL,
+	UNIT_THROWER,
+	UNIT_HORSE,
+} UnitType;
+
 typedef struct Cup
 {
 	bool active;
@@ -56,6 +64,7 @@ Rectangle UnitAttackArea(Unit unit);
 Rectangle CupHitbox(Unit unit, int cup_id);
 
 Unit UnitInit(void);
+Unit MakeUnit(int type, Vector2 position, char side);
 
 void UnitMove(Unit* unit, float mult);
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);

@@ -15,28 +15,10 @@ int main(void)
 	Unit units_left[MAX_UNITS] = {0};
 	Unit units_right[MAX_UNITS] = {0};
 
-	units_left[0] = UnitInit();
-	units_left[0].position = LEFT_START_POS;
-	units_left[0].side = 1;
-	units_left[0].state = STATE_MOVE;
-
-	units_left[1] = UnitInit();
-	units_left[1].position = LEFT_START_POS;
-	units_left[1].position.x -= 80;
-	units_left[1].side = 1;
-	units_left[1].length = 2.0;
-	units_left[1].speed = 32.0;
-	units_left[1].state = STATE_MOVE;
-	units_left[1].cups[1].active = 1;
-	units_left[1].cups[1].offset.x = 32;
-	units_left[1].cups[2].active = 1;
-	units_left[1].cups[2].offset.x = 16;
-	units_left[1].cups[2].offset.y = 32;
-
-	units_right[0] = UnitInit();
-	units_right[0].position = RIGHT_START_POS;
-	units_right[0].side = -1;
-	units_right[0].state = STATE_MOVE;
+	units_left[0] = MakeUnit(UNIT_BASIC, LEFT_START_POS, 1);
+	units_left[1] = MakeUnit(UNIT_TALL, LEFT_START_POS, 1);
+	units_right[0] = MakeUnit(UNIT_BASIC, RIGHT_START_POS, -1);
+	units_right[1] = MakeUnit(UNIT_THROWER, RIGHT_START_POS, -1);
 
 	while(!WindowShouldClose())
 	{

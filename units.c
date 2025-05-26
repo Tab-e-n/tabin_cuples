@@ -43,7 +43,7 @@ Rectangle UnitAttackArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
 	area.width = CUP_SIZE * unit.area;
-	area.height = CUP_SIZE;
+	area.height = CUP_SIZE - 1;
 
 	area.x = unit.position.x;
 	if(unit.side < 0)
@@ -62,7 +62,7 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 {
 	Cup cup = unit.cups[cup_id];
 	Vector2 offset = cup.offset;
-	offset = Vector2Scale(offset, (float)unit.side);
+	offset.x = offset.x * (float)unit.side;
 	Rectangle hitbox;
 	hitbox.x = unit.position.x - CUP_SIZE * 0.5 + offset.x;
 	hitbox.y = unit.position.y - CUP_SIZE - offset.y;
@@ -79,12 +79,12 @@ Unit UnitInit(void)
 	unit.damage = 2;
 	unit.incoming = 0;
 	unit.state = STATE_NULL;
-	unit.state_time = 1.0;
 	unit.cooldown = 1.0;
 	unit.speed = 16.0;
 	unit.area = 1.0;
 	unit.range = 1.0;
 	unit.length = 1.0;
+	unit.state_time = 1.0;
 	unit.enemy_distance = 0.0;
 	unit.side = 0;
 	unit.alive = 1;
@@ -99,8 +99,111 @@ Unit UnitInit(void)
 	return unit;
 }
 
+Unit MakeUnit(int type, Vector2 position, char side)
+{
+	Unit unit = UnitInit();
+	unit.position = position;
+	unit.state = STATE_IDLE;
+	unit.side = side;
+
+	switch(type)
+	{
+		case(UNIT_BASIC):
+			unit.health = 8;
+			unit.damage = 2;
+			unit.cooldown = 1.0;
+			unit.speed = 16.0;
+			unit.area = 1.0;
+			unit.range = 1.0;
+			unit.length = 1.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			break;
+		case(UNIT_TALL):
+			unit.health = 16;
+			unit.damage = 2;
+			unit.cooldown = 1.0;
+			unit.speed = 14.0;
+			unit.area = 2.0;
+			unit.range = 1.0;
+			unit.length = 1.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 1;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 0;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){0, CUP_SIZE};
+			break;
+		case(UNIT_THROWER):
+			unit.health = 16;
+			unit.damage = 2;
+			unit.cooldown = 1.0;
+			unit.speed = 14.0;
+			unit.area = 1.0;
+			unit.range = 2.0;
+			unit.length = 1.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 1;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){0, CUP_SIZE};
+			break;
+		case(UNIT_HORSE):
+			unit.health = 24;
+			unit.damage = 2;
+			unit.cooldown = 0.5;
+			unit.speed = 32.0;
+			unit.area = 1.0;
+			unit.range = 1.0;
+			unit.length = 2.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 0;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
+			unit.cups[2].active = true;
+			unit.cups[2].pattern = 0;
+			unit.cups[2].animation = 0;
+			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
+			break;
+		default:
+			unit.health = 8;
+			unit.damage = 2;
+			unit.cooldown = 1.0;
+			unit.speed = 16.0;
+			unit.area = 1.0;
+			unit.range = 1.0;
+			unit.length = 1.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = false;
+			unit.cups[2].active = false;
+			unit.cups[3].active = false;
+			unit.cups[4].active = false;
+			break;
+	}
+
+	return unit;
+}
+
 void UnitMove(Unit* unit, float mult)
 {
+	if(unit->speed == 0.0)
+	{
+		return;
+	}
 	unit->position.x += unit->side * FRAME * unit->speed * mult;
 }
 
@@ -307,7 +410,12 @@ void DrawUnitDebug(Unit unit)
 	{
 		if(unit.cups[i].active)
 		{
-			DrawRectangleRec(CupHitbox(unit, i), BLACK);
+			Color color = GRAY;
+			if(unit.cups[i].pattern == 1)
+			{
+				color = BLACK;
+			}
+			DrawRectangleRec(CupHitbox(unit, i), color);
 		}
 	}
 	if(unit.state == STATE_ATTACK_START)
