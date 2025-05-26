@@ -24,6 +24,7 @@ typedef enum UnitState
 
 typedef enum UnitType
 {
+	UNIT_BASE,
 	UNIT_BASIC,
 	UNIT_TALL,
 	UNIT_THROWER,
@@ -68,8 +69,10 @@ Unit MakeUnit(int type, Vector2 position, char side);
 
 void UnitMove(Unit* unit, float mult);
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
+bool UnitCanPass(Unit* unit, Unit* other);
 bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS]);
 void UnitAttack(Unit* unit, Unit units[MAX_UNITS]);
+
 void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
 void UnitDamage(Unit* unit);
 

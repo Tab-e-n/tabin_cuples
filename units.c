@@ -64,7 +64,7 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 	Vector2 offset = cup.offset;
 	offset.x = offset.x * (float)unit.side;
 	Rectangle hitbox;
-	hitbox.x = unit.position.x - CUP_SIZE * 0.5 + offset.x;
+	hitbox.x = unit.position.x - CUP_SIZE * 0.45 + offset.x;
 	hitbox.y = unit.position.y - CUP_SIZE - offset.y;
 	hitbox.width = CUP_SIZE * 0.9;
 	hitbox.height = CUP_SIZE;
@@ -108,6 +108,19 @@ Unit MakeUnit(int type, Vector2 position, char side)
 
 	switch(type)
 	{
+		case(UNIT_BASE):
+			unit.health = 80;
+			unit.damage = 2;
+			unit.cooldown = 3.0;
+			unit.speed = 0.0;
+			unit.area = 1.0;
+			unit.range = 3.0;
+			unit.length = 1.0;
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			break;
 		case(UNIT_BASIC):
 			unit.health = 8;
 			unit.damage = 2;
@@ -124,7 +137,7 @@ Unit MakeUnit(int type, Vector2 position, char side)
 		case(UNIT_TALL):
 			unit.health = 16;
 			unit.damage = 2;
-			unit.cooldown = 1.0;
+			unit.cooldown = 1.2;
 			unit.speed = 14.0;
 			unit.area = 2.0;
 			unit.range = 1.0;
@@ -239,13 +252,18 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 	return false;
 }
 
+bool UnitCanPass(Unit* unit, Unit* other)
+{
+	return (other->state == STATE_MOVE || other->state == STATE_IDLE) && other->speed < unit->speed;
+}
+
 bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS])
 {
 	Rectangle detect_range = UnitFrontArea(*unit);
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
-		if(other.alive != 0 && other.speed >= unit->speed) for(int j = 0; j < CUPS_PER_UNIT; j++)
+		if(other.alive != 0 && !UnitCanPass(unit, &other)) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
 			{
@@ -347,7 +365,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 			}
 		}
 		// STATE START
-		if(unit->state != STATE_IDLE)
+		if(unit->state == STATE_MOVE)
 		{
 			unit->idle_backup = 0;
 		}
