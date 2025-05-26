@@ -43,6 +43,7 @@ typedef struct Unit
 {
 	Vector2 position;
 	int health, // Current health, basic unit has 8 health
+	    max_health, // Max health, stays the same
 	    damage, // Amount of damage dealt when unit attacks
 	    incoming; // * Damage is dealt after every unit is processed, stored here
 	UnitState state;
@@ -56,6 +57,7 @@ typedef struct Unit
 	char side, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed
 	     idle_backup; // * When overlaping another unit, backup after standing for too long.
+	Vector2 health_bar_offset;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
 
@@ -77,5 +79,6 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
 void UnitDamage(Unit* unit);
 
 void DrawUnitDebug(Unit unit);
+void DrawHealthBar(Unit unit);
 
 #endif
