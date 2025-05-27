@@ -162,10 +162,7 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.area = 1.0;
 			unit.range = 2.0;
 			unit.length = 1.0;
-<<<<<<< HEAD
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
-=======
->>>>>>> parent of 9b62fd4 (Health bars)
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
