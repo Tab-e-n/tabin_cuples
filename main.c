@@ -21,43 +21,34 @@ int main(void)
 	const Vector2 LEFT_START_POS = (Vector2){-256, 128}; 
 	const Vector2 RIGHT_START_POS = (Vector2){256, 128};
 
-	Unit units_left[MAX_UNITS] = {0};
-	Unit units_right[MAX_UNITS] = {0};
+	Side left = SideInit(LEFT_START_POS, 1);
+	Side right = SideInit(RIGHT_START_POS, -1);
 
-	units_left[0] = MakeUnit(UNIT_BASE, LEFT_START_POS, 1);
-	units_left[1] = MakeUnit(UNIT_HORSE, LEFT_START_POS, 1);
-	units_left[2] = MakeUnit(UNIT_BASIC, LEFT_START_POS, 1);
-	units_right[0] = MakeUnit(UNIT_BASE, RIGHT_START_POS, -1);
-	units_right[1] = MakeUnit(UNIT_CANNON, RIGHT_START_POS, -1);
-	units_right[2] = MakeUnit(UNIT_BASIC, RIGHT_START_POS, -1);
+	SpawnUnit(UNIT_HORSE, &left);
+	SpawnUnit(UNIT_CANNON, &right);
 
 	srand(time(0));
 	float tempo_spawn_timer = 0.0;
-	int unit = 3;
 
 	while(!WindowShouldClose())
 	{
 
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
-			UnitProcess(&units_left[i], units_right, units_left);
-			UnitProcess(&units_right[i], units_left, units_right);
+			UnitProcess(&left.units[i], &right, &left);
+			UnitProcess(&right.units[i], &left, &right);
 		}
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
-			UnitDamage(&units_left[i]);
-			UnitDamage(&units_right[i]);
+			UnitDamage(&left.units[i]);
+			UnitDamage(&right.units[i]);
 		}
-		if(unit < MAX_UNITS)
+		tempo_spawn_timer += .016;
+		if(tempo_spawn_timer > 20.0)
 		{
-			tempo_spawn_timer += .016;
-			if(tempo_spawn_timer > 20.0)
-			{
-				tempo_spawn_timer = 0.0;
-				units_left[unit] = MakeUnit(rand()%7+1, LEFT_START_POS, 1);
-				units_right[unit] = MakeUnit(rand()%7+1, RIGHT_START_POS, -1);
-				unit++;
-			}
+			tempo_spawn_timer = 0.0;
+			SpawnUnit(rand()%7+1, &left);
+			SpawnUnit(rand()%7+1, &right);
 		}
 
 
@@ -66,18 +57,18 @@ int main(void)
 		BeginMode2D(camera);
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
-			DrawUnitDebug(units_left[i]);
-			DrawUnitDebug(units_right[i]);
+			DrawUnitDebug(left.units[i]);
+			DrawUnitDebug(right.units[i]);
 		}
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
-			DrawUnitDebugAttack(units_left[i]);
-			DrawUnitDebugAttack(units_right[i]);
+			DrawUnitDebugAttack(left.units[i]);
+			DrawUnitDebugAttack(right.units[i]);
 		}
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
-			DrawHealthBar(units_left[i]);
-			DrawHealthBar(units_right[i]);
+			DrawHealthBar(left.units[i]);
+			DrawHealthBar(right.units[i]);
 		}
 		EndMode2D();
 		EndDrawing();

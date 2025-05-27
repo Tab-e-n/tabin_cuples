@@ -62,12 +62,20 @@ typedef struct Unit
 	      state_time, // * Amount of time until the state ends
 	      move_time,
 	      enemy_distance; // * How far the last detected enemy is, limited by range
-	char side, // 1 (player) or -1 (opponent)
+	char direction, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed
 	     idle_backup; // * When overlaping another unit, backup after standing for too long.
 	Vector2 health_bar_offset;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
+
+typedef struct Side
+{
+	Vector2 spawn_position;
+	char direction,
+	     current_unit;
+	Unit units[MAX_UNITS];
+} Side;
 
 Rectangle UnitDetectionArea(Unit unit);
 Rectangle UnitFrontArea(Unit unit);
@@ -76,16 +84,19 @@ Rectangle CupHitbox(Unit unit, int cup_id);
 Vector2 CupPosition(Unit unit, int cup_id);
 
 Unit UnitInit(void);
-Unit MakeUnit(int type, Vector2 position, char side);
+Unit MakeUnit(int type, Vector2 position, char direction);
 
 void UnitMove(Unit* unit, float mult);
-bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS]);
+bool UnitDetectionRangeCheck(Unit* unit, Side* side);
 bool UnitCanPass(Unit* unit, Unit* other);
-bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS]);
-void UnitAttack(Unit* unit, Unit units[MAX_UNITS]);
+bool UnitFrontCheck(Unit* unit, Side* side);
+void UnitAttack(Unit* unit, Side* side);
 
-void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
+void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side);
 void UnitDamage(Unit* unit);
+
+Side SideInit(Vector2 start_pos, char direction);
+bool SpawnUnit(int type, Side* side);
 
 void DrawUnitDebug(Unit unit);
 void DrawUnitDebugAttack(Unit unit);

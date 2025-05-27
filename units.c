@@ -9,7 +9,7 @@ Rectangle UnitDetectionArea(Unit unit)
 	area.width = CUP_SIZE * (maxf(unit.range - 1.0, 0.0) + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.5));
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
-	if(unit.side < 0)
+	if(unit.direction < 0)
 	{
 		area.x -= area.width + CUP_SIZE * (unit.length - 0.5);
 	}
@@ -27,7 +27,7 @@ Rectangle UnitFrontArea(Unit unit)
 	area.width = CUP_SIZE * 0.125;
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
-	if(unit.side < 0)
+	if(unit.direction < 0)
 	{
 		area.x -= area.width + CUP_SIZE * (unit.length - 0.4675);
 	}
@@ -46,7 +46,7 @@ Rectangle UnitAttackArea(Unit unit)
 	area.height = CUP_SIZE - 1;
 
 	area.x = unit.position.x;
-	if(unit.side < 0)
+	if(unit.direction < 0)
 	{
 		area.x -= area.width * 1.0 + CUP_SIZE * ((unit.length - 0.5) + unit.enemy_distance);
 	}
@@ -62,7 +62,7 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 {
 	Cup cup = unit.cups[cup_id];
 	Vector2 offset = cup.offset;
-	offset.x = offset.x * (float)unit.side;
+	offset.x = offset.x * (float)unit.direction;
 	Rectangle hitbox;
 	hitbox.x = unit.position.x - CUP_SIZE * 0.45 + offset.x;
 	hitbox.y = unit.position.y - CUP_SIZE - offset.y;
@@ -75,7 +75,7 @@ Vector2 CupPosition(Unit unit, int cup_id)
 {
 	Cup cup = unit.cups[cup_id];
 	Vector2 offset = cup.offset;
-	offset.x = offset.x * (float)unit.side;
+	offset.x = offset.x * (float)unit.direction;
 	return Vector2Add(unit.position, offset);
 }
 
@@ -98,7 +98,7 @@ Unit UnitInit(void)
 	unit.state_time = 1.0;
 	unit.move_time = 0.0;
 	unit.enemy_distance = 0.0;
-	unit.side = 0;
+	unit.direction = 0;
 	unit.alive = 1;
 	unit.idle_backup = 0;
 	unit.health_bar_offset = (Vector2){0, 32};
@@ -112,12 +112,12 @@ Unit UnitInit(void)
 	return unit;
 }
 
-Unit MakeUnit(int type, Vector2 position, char side)
+Unit MakeUnit(int type, Vector2 position, char direction)
 {
 	Unit unit = UnitInit();
 	unit.position = position;
 	unit.state = STATE_IDLE;
-	unit.side = side;
+	unit.direction = direction;
 
 	switch(type)
 	{
@@ -245,11 +245,11 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.max_health = 24;
 			unit.damage = 4;
 			unit.cooldown = 1.0;
-			unit.speed = 10.5;
+			unit.speed = 7.5;
 			unit.move_full = 10.0;
 			unit.move_wait = 0.0;
 			unit.area = 0.75;
-			unit.range = 2.25;
+			unit.range = 2.75;
 			unit.length = 2.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
@@ -328,18 +328,18 @@ void UnitMove(Unit* unit, float mult)
 	}
 	else if(unit->move_time > unit->move_wait)
 	{
-		unit->position.x += unit->side * FRAME * unit->speed * mult;
+		unit->position.x += unit->direction * FRAME * unit->speed * mult;
 	}
 }
 
-bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
+bool UnitDetectionRangeCheck(Unit* unit, Side* side)
 {
 	Rectangle detect_range = UnitDetectionArea(*unit);
 	bool detected = false;
 	unit->enemy_distance = -1.0;
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
-		Unit other = units[i];
+		Unit other = side->units[i];
 		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
@@ -361,7 +361,7 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 					{
 						unit->enemy_distance = distance;
 					}
-					TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
+					//TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
 					detected = true;
 				}
 			}
@@ -375,12 +375,12 @@ bool UnitCanPass(Unit* unit, Unit* other)
 	return (other->state == STATE_MOVE || other->state == STATE_IDLE) && other->speed < unit->speed;
 }
 
-bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS])
+bool UnitFrontCheck(Unit* unit, Side* side)
 {
 	Rectangle detect_range = UnitFrontArea(*unit);
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
-		Unit other = units[i];
+		Unit other = side->units[i];
 		if(other.alive != 0 && !UnitCanPass(unit, &other)) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
@@ -396,12 +396,12 @@ bool UnitFrontCheck(Unit* unit, Unit units[MAX_UNITS])
 	return false;
 }
 
-void UnitAttack(Unit* unit, Unit units[MAX_UNITS])
+void UnitAttack(Unit* unit, Side* side)
 {
 	Rectangle hurtbox = UnitAttackArea(*unit);
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
-		Unit other = units[i];
+		Unit other = side->units[i];
 		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
 		{
 			if(other.cups[j].active)
@@ -409,14 +409,14 @@ void UnitAttack(Unit* unit, Unit units[MAX_UNITS])
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(hurtbox, hitbox))
 				{
-					units[i].incoming += unit->damage;
+					side->units[i].incoming += unit->damage;
 				}
 			}
 		}
 	}
 }
 
-void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
+void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 {
 	if(unit->alive == 0)
 	{
@@ -446,7 +446,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 		if(unit->state == STATE_ATTACK_START)
 		{
 			//TraceLog(LOG_INFO, "Attack");
-			UnitAttack(unit, enemis);
+			UnitAttack(unit, enemy_side);
 		}
 		if(unit->state == STATE_DEATH)
 		{
@@ -468,11 +468,11 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 		}
 		if(unit->state == STATE_MOVE || unit->state == STATE_IDLE)
 		{
-			if(UnitDetectionRangeCheck(unit, enemis))
+			if(UnitDetectionRangeCheck(unit, enemy_side))
 			{
 				unit->state = STATE_ATTACK_START;
 			}
-			else if(UnitFrontCheck(unit, friends))
+			else if(UnitFrontCheck(unit, friend_side))
 			{
 				unit->state = STATE_IDLE;
 				unit->idle_backup += 1;
@@ -528,6 +528,39 @@ void UnitDamage(Unit* unit)
 	//TraceLog(LOG_INFO, "%i", unit->health);
 }
 
+Side SideInit(Vector2 start_pos, char direction)
+{
+	Side side = (Side){0};
+	side.spawn_position = start_pos;
+	side.direction = direction;
+	side.current_unit = 0;
+	SpawnUnit(UNIT_BASE, &side);
+	return side;
+}
+
+bool SpawnUnit(int type, Side* side)
+{
+	int reps = 0;
+	while(reps < MAX_UNITS && side->units[side->current_unit].alive)
+	{
+		side->current_unit++;
+		reps++;
+		if(side->current_unit == MAX_UNITS)
+		{
+			side->current_unit = 1;
+		}
+	}
+	if(reps < MAX_UNITS)
+	{
+		side->units[side->current_unit] = MakeUnit(type, side->spawn_position, side->direction);
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
 void DrawUnitDebug(Unit unit)
 {
 	if(unit.alive == 0)
@@ -576,7 +609,7 @@ void DrawHealthBar(Unit unit)
 		return;
 	}
 	Vector2 pos = unit.position;
-	pos.x += CUP_SIZE * -0.5 + unit.health_bar_offset.x * unit.side;
+	pos.x += CUP_SIZE * -0.5 + unit.health_bar_offset.x * unit.direction;
 	pos.y -= 8 + unit.health_bar_offset.y;
 	DrawRectangle(pos.x, pos.y, CUP_SIZE, 4, RED);
 	DrawRectangle(pos.x, pos.y, CUP_SIZE * ((float)unit.health / (float)unit.max_health), 4, GREEN);
