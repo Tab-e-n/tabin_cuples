@@ -69,11 +69,6 @@ int main(void)
 			DrawUnitDebug(units_left[i]);
 			DrawUnitDebug(units_right[i]);
 		}
-		for(int i = 0; i < MAX_UNITS; i++)
-		{
-			DrawHealthBar(units_left[i]);
-			DrawHealthBar(units_right[i]);
-		}
 		EndMode2D();
 		EndDrawing();
 

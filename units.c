@@ -76,7 +76,6 @@ Unit UnitInit(void)
 	Unit unit = (Unit){0};
 	unit.position = (Vector2){0, 0};
 	unit.health = 8;
-	unit.max_health = 8;
 	unit.damage = 2;
 	unit.incoming = 0;
 	unit.state = STATE_NULL;
@@ -93,7 +92,6 @@ Unit UnitInit(void)
 	unit.side = 0;
 	unit.alive = 1;
 	unit.idle_backup = 0;
-	unit.health_bar_offset = (Vector2){0, 32};
 
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
 	{
@@ -114,42 +112,39 @@ Unit MakeUnit(int type, Vector2 position, char side)
 	switch(type)
 	{
 		case(UNIT_BASE):
-			unit.max_health = 80;
+			unit.health = 80;
 			unit.damage = 2;
 			unit.cooldown = 3.0;
 			unit.speed = 0.0;
-			unit.area = 0.75;
-			unit.range = 3.5;
+			unit.area = 1.0;
+			unit.range = 3.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, 96};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
 			unit.cups[0].offset = (Vector2){0, 0};
 			break;
 		case(UNIT_BASIC):
-			unit.max_health = 8;
+			unit.health = 8;
 			unit.damage = 2;
 			unit.cooldown = 1.0;
 			unit.speed = 16.0;
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, 32};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
 			unit.cups[0].offset = (Vector2){0, 0};
 			break;
 		case(UNIT_TALL):
-			unit.max_health = 16;
+			unit.health = 16;
 			unit.damage = 2;
 			unit.cooldown = 1.2;
-			unit.speed = 15.0;
+			unit.speed = 14.0;
 			unit.area = 2.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, 64};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 1;
 			unit.cups[0].animation = 0;
@@ -160,14 +155,17 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[1].offset = (Vector2){0, CUP_SIZE};
 			break;
 		case(UNIT_THROWER):
-			unit.max_health = 16;
+			unit.health = 16;
 			unit.damage = 2;
 			unit.cooldown = 1.0;
 			unit.speed = 14.0;
 			unit.area = 1.0;
 			unit.range = 2.0;
 			unit.length = 1.0;
+<<<<<<< HEAD
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
+=======
+>>>>>>> parent of 9b62fd4 (Health bars)
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -200,14 +198,13 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[2].offset = (Vector2){0, CUP_SIZE * 2};
 			break;
 		case(UNIT_HORSE):
-			unit.max_health = 24;
+			unit.health = 24;
 			unit.damage = 2;
 			unit.cooldown = 0.5;
 			unit.speed = 32.0;
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 2.0;
-			unit.health_bar_offset = (Vector2){16, 64};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -244,14 +241,13 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
 			break;
 		default:
-			unit.max_health = 8;
+			unit.health = 8;
 			unit.damage = 2;
 			unit.cooldown = 1.0;
 			unit.speed = 16.0;
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, 32};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -262,7 +258,6 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[4].active = false;
 			break;
 	}
-	unit.health = unit.max_health;
 
 	return unit;
 }
@@ -287,8 +282,6 @@ void UnitMove(Unit* unit, float mult)
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 {
 	Rectangle detect_range = UnitDetectionArea(*unit);
-	bool detected = false;
-	unit->enemy_distance = 0.0;
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
@@ -299,27 +292,23 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					float distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV - unit->length + 1.0;
-					if(distance > unit->range)
+					unit->enemy_distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV - unit->length + 1.0;
+					if(unit->enemy_distance > unit->range)
 					{
-						distance = unit->range; 
+						unit->enemy_distance = unit->range; 
 					}
-					distance -= 1.0;
-					if(distance < 0.0)
+					unit->enemy_distance -= 1.0;
+					if(unit->enemy_distance < 0.0)
 					{
-						distance = 0.0;
-					}
-					if(distance < unit->enemy_distance || unit->enemy_distance == 0.0)
-					{
-						unit->enemy_distance = distance;
+						unit->enemy_distance = 0.0;
 					}
 					//TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
-					detected = true;
+					return true;
 				}
 			}
 		}
 	}
-	return detected;
+	return false;
 }
 
 bool UnitCanPass(Unit* unit, Unit* other)
@@ -511,17 +500,4 @@ void DrawUnitDebug(Unit unit)
 		DrawRectangleRec(UnitAttackArea(unit), TRANS_RED);
 	}
 	DrawPixel(unit.position.x, unit.position.y, GREEN);
-}
-
-void DrawHealthBar(Unit unit)
-{
-	if(unit.alive == 0)
-	{
-		return;
-	}
-	Vector2 pos = unit.position;
-	pos.x += CUP_SIZE * -0.5 + unit.health_bar_offset.x * unit.side;
-	pos.y -= 8 + unit.health_bar_offset.y;
-	DrawRectangle(pos.x, pos.y, CUP_SIZE, 4, RED);
-	DrawRectangle(pos.x, pos.y, CUP_SIZE * ((float)unit.health / (float)unit.max_health), 4, GREEN);
 }
