@@ -28,7 +28,12 @@ typedef enum UnitType
 	UNIT_BASIC,
 	UNIT_TALL,
 	UNIT_THROWER,
+	UNIT_PILLAR,
 	UNIT_HORSE,
+	UNIT_CANNON,
+	UNIT_VETERAN,
+	UNIT_PIRATE,
+	UNIT_CLERIC,
 } UnitType;
 
 typedef struct Cup
@@ -49,10 +54,13 @@ typedef struct Unit
 	UnitState state;
 	float cooldown, // Base cooldown after attacking
 	      speed, // Pixels per frame
+	      move_full,
+	      move_wait,
 	      area, // The size of the damage area in cups
 	      range, // How many cups far can the unit attack
 	      length, // How many cups long is the unit
 	      state_time, // * Amount of time until the state ends
+	      move_time,
 	      enemy_distance; // * How far the last detected enemy is, limited by range
 	char side, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed

@@ -82,10 +82,13 @@ Unit UnitInit(void)
 	unit.state = STATE_NULL;
 	unit.cooldown = 1.0;
 	unit.speed = 16.0;
+	unit.move_full = 1.0;
+	unit.move_wait = 0.25;
 	unit.area = 1.0;
 	unit.range = 1.0;
 	unit.length = 1.0;
 	unit.state_time = 1.0;
+	unit.move_time = 0.0;
 	unit.enemy_distance = 0.0;
 	unit.side = 0;
 	unit.alive = 1;
@@ -164,7 +167,7 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.area = 1.0;
 			unit.range = 2.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, 64};
+			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -173,6 +176,28 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[1].pattern = 1;
 			unit.cups[1].animation = 0;
 			unit.cups[1].offset = (Vector2){0, CUP_SIZE};
+			break;
+		case(UNIT_PILLAR):
+			unit.max_health = 24;
+			unit.damage = 2;
+			unit.cooldown = 1.2;
+			unit.speed = 15.0;
+			unit.area = 3.0;
+			unit.range = 1.0;
+			unit.length = 1.0;
+			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 3};
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 1;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){0, CUP_SIZE};
+			unit.cups[2].active = true;
+			unit.cups[2].pattern = 0;
+			unit.cups[2].animation = 0;
+			unit.cups[2].offset = (Vector2){0, CUP_SIZE * 2};
 			break;
 		case(UNIT_HORSE):
 			unit.max_health = 24;
@@ -193,6 +218,28 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
 			unit.cups[2].active = true;
 			unit.cups[2].pattern = 0;
+			unit.cups[2].animation = 0;
+			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
+			break;
+		case(UNIT_CANNON):
+			unit.max_health = 24;
+			unit.damage = 4;
+			unit.cooldown = 1.0;
+			unit.speed = 14.0;
+			unit.area = 1.0;
+			unit.range = 2.0;
+			unit.length = 2.0;
+			unit.health_bar_offset = (Vector2){16, 64};
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 0;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 0;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
+			unit.cups[2].active = true;
+			unit.cups[2].pattern = 1;
 			unit.cups[2].animation = 0;
 			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
 			break;
@@ -226,7 +273,15 @@ void UnitMove(Unit* unit, float mult)
 	{
 		return;
 	}
-	unit->position.x += unit->side * FRAME * unit->speed * mult;
+	unit->move_time += FRAME;
+	if(unit->move_time > unit->move_full)
+	{
+		unit->move_time = 0;
+	}
+	else if(unit->move_time > unit->move_wait)
+	{
+		unit->position.x += unit->side * FRAME * unit->speed * mult;
+	}
 }
 
 bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
