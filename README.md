@@ -29,5 +29,5 @@ TBA
 
 ## DEVELOPED WITH
 
-Raylib 5.0
-Coded in C
+ - Raylib 5.0
+ - Coded in C
