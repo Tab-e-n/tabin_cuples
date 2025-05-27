@@ -6,9 +6,9 @@ Currently, there is no player interaction programmed, the game plays itself.
 
 ## EXPORTING
 
-First download this repository.
+First download this repository. Then, depending on the OS you have:
 
-### LINUX
+### Linux
 
 After downloading, open the console, then in this repository type:
 
@@ -17,9 +17,9 @@ make
 `
 
 A file named `cuples.out` should be made, along with a few other files.
-Open `cuples.out` to start the project.
+Open `cuples.out` to run the project.
 
-### WINDOWS
+### Windows
 
 TBA
 
