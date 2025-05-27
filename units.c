@@ -378,7 +378,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 	{
 		UnitMove(unit, -1.0);
 	}
-	switch(unit->state)
+	else switch(unit->state)
 	{
 		case STATE_MOVE:
 			UnitMove(unit, 1.0);
@@ -435,7 +435,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS])
 			}
 		}
 		// STATE START
-		if(unit->state == STATE_MOVE)
+		if(unit->state == STATE_MOVE && unit->move_time < unit->move_wait)
 		{
 			unit->idle_backup = 0;
 		}
