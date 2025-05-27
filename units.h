@@ -73,6 +73,7 @@ Rectangle UnitDetectionArea(Unit unit);
 Rectangle UnitFrontArea(Unit unit);
 Rectangle UnitAttackArea(Unit unit);
 Rectangle CupHitbox(Unit unit, int cup_id);
+Vector2 CupPosition(Unit unit, int cup_id);
 
 Unit UnitInit(void);
 Unit MakeUnit(int type, Vector2 position, char side);
@@ -87,6 +88,7 @@ void UnitProcess(Unit* unit, Unit enemis[MAX_UNITS], Unit friends[MAX_UNITS]);
 void UnitDamage(Unit* unit);
 
 void DrawUnitDebug(Unit unit);
+void DrawUnitDebugAttack(Unit unit);
 void DrawHealthBar(Unit unit);
 
 #endif

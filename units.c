@@ -71,6 +71,14 @@ Rectangle CupHitbox(Unit unit, int cup_id)
 	return hitbox;
 }
 
+Vector2 CupPosition(Unit unit, int cup_id)
+{
+	Cup cup = unit.cups[cup_id];
+	Vector2 offset = cup.offset;
+	offset.x = offset.x * (float)unit.side;
+	return Vector2Add(unit.position, offset);
+}
+
 Unit UnitInit(void)
 {
 	Unit unit = (Unit){0};
@@ -172,8 +180,8 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.speed = 14.0;
 			unit.move_full = 1.0;
 			unit.move_wait = 0.30;
-			unit.area = 1.0;
-			unit.range = 2.0;
+			unit.area = 0.75;
+			unit.range = 2.25;
 			unit.length = 1.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
 			unit.cups[0].active = true;
@@ -240,8 +248,8 @@ Unit MakeUnit(int type, Vector2 position, char side)
 			unit.speed = 10.5;
 			unit.move_full = 10.0;
 			unit.move_wait = 0.0;
-			unit.area = 1.0;
-			unit.range = 2.0;
+			unit.area = 0.75;
+			unit.range = 2.25;
 			unit.length = 2.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
@@ -328,7 +336,7 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 {
 	Rectangle detect_range = UnitDetectionArea(*unit);
 	bool detected = false;
-	unit->enemy_distance = 0.0;
+	unit->enemy_distance = -1.0;
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = units[i];
@@ -339,7 +347,7 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					float distance = absf(unit->position.x - other.position.x) * CUP_SIZE_INV - unit->length + 1.0;
+					float distance = absf(unit->position.x - CupPosition(other, j).x) * CUP_SIZE_INV - unit->length + 1.0;
 					if(distance > unit->range)
 					{
 						distance = unit->range; 
@@ -349,11 +357,11 @@ bool UnitDetectionRangeCheck(Unit* unit, Unit units[MAX_UNITS])
 					{
 						distance = 0.0;
 					}
-					if(distance < unit->enemy_distance || unit->enemy_distance == 0.0)
+					if(unit->enemy_distance == -1.0 || distance < unit->enemy_distance)
 					{
 						unit->enemy_distance = distance;
 					}
-					//TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
+					TraceLog(LOG_INFO, "Enemy dist: %f", unit->enemy_distance);
 					detected = true;
 				}
 			}
@@ -546,11 +554,19 @@ void DrawUnitDebug(Unit unit)
 			DrawRectangleRec(CupHitbox(unit, i), color);
 		}
 	}
+	DrawPixel(unit.position.x, unit.position.y, GREEN);
+}
+
+void DrawUnitDebugAttack(Unit unit)
+{
+	if(unit.alive == 0)
+	{
+		return;
+	}
 	if(unit.state == STATE_ATTACK_START)
 	{
 		DrawRectangleRec(UnitAttackArea(unit), TRANS_RED);
 	}
-	DrawPixel(unit.position.x, unit.position.y, GREEN);
 }
 
 void DrawHealthBar(Unit unit)

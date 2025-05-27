@@ -25,10 +25,10 @@ int main(void)
 	Unit units_right[MAX_UNITS] = {0};
 
 	units_left[0] = MakeUnit(UNIT_BASE, LEFT_START_POS, 1);
-	units_left[1] = MakeUnit(UNIT_TALL, LEFT_START_POS, 1);
+	units_left[1] = MakeUnit(UNIT_HORSE, LEFT_START_POS, 1);
 	units_left[2] = MakeUnit(UNIT_BASIC, LEFT_START_POS, 1);
 	units_right[0] = MakeUnit(UNIT_BASE, RIGHT_START_POS, -1);
-	units_right[1] = MakeUnit(UNIT_THROWER, RIGHT_START_POS, -1);
+	units_right[1] = MakeUnit(UNIT_CANNON, RIGHT_START_POS, -1);
 	units_right[2] = MakeUnit(UNIT_BASIC, RIGHT_START_POS, -1);
 
 	srand(time(0));
@@ -68,6 +68,11 @@ int main(void)
 		{
 			DrawUnitDebug(units_left[i]);
 			DrawUnitDebug(units_right[i]);
+		}
+		for(int i = 0; i < MAX_UNITS; i++)
+		{
+			DrawUnitDebugAttack(units_left[i]);
+			DrawUnitDebugAttack(units_right[i]);
 		}
 		for(int i = 0; i < MAX_UNITS; i++)
 		{
