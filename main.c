@@ -24,8 +24,8 @@ int main(void)
 	Side left = SideInit(LEFT_START_POS, 1);
 	Side right = SideInit(RIGHT_START_POS, -1);
 
-	SpawnUnit(UNIT_HORSE, &left);
-	SpawnUnit(UNIT_CANNON, &right);
+	SpawnUnit(UNIT_BASIC, &left);
+	SpawnUnit(UNIT_BASIC, &right);
 
 	bool processing = true;
 	char win = 0;
