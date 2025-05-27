@@ -54,8 +54,8 @@ int main(void)
 			if(tempo_spawn_timer > 20.0)
 			{
 				tempo_spawn_timer = 0.0;
-				units_left[unit] = MakeUnit(rand()%4+1, LEFT_START_POS, 1);
-				units_right[unit] = MakeUnit(rand()%4+1, RIGHT_START_POS, -1);
+				units_left[unit] = MakeUnit(rand()%7+1, LEFT_START_POS, 1);
+				units_right[unit] = MakeUnit(rand()%7+1, RIGHT_START_POS, -1);
 				unit++;
 			}
 		}
