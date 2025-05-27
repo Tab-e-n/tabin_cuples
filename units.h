@@ -97,6 +97,7 @@ void UnitDamage(Unit* unit);
 
 Side SideInit(Vector2 start_pos, char direction);
 bool SpawnUnit(int type, Side* side);
+char BaseAlive(Side* side);
 
 void DrawUnitDebug(Unit unit);
 void DrawUnitDebugAttack(Unit unit);

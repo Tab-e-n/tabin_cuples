@@ -244,7 +244,7 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 		case(UNIT_CANNON):
 			unit.max_health = 24;
 			unit.damage = 4;
-			unit.cooldown = 1.0;
+			unit.cooldown = 1.5;
 			unit.speed = 7.5;
 			unit.move_full = 10.0;
 			unit.move_wait = 0.0;
@@ -271,7 +271,7 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			unit.cooldown = 0.75;
 			unit.speed = 18.0;
 			unit.move_full = 1.0;
-			unit.move_wait = 0.25;
+			unit.move_wait = 0.2;
 			unit.area = 1.0;
 			unit.range = 1.25;
 			unit.length = 2.0;
@@ -559,6 +559,11 @@ bool SpawnUnit(int type, Side* side)
 	{
 		return false;
 	}
+}
+
+char BaseAlive(Side* side)
+{
+	return side->units[0].alive;
 }
 
 void DrawUnitDebug(Unit unit)
