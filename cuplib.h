@@ -9,6 +9,7 @@
 #define TRANS_PURPLE (Color){200, 122, 255, 128}
 #define TRANS_RED (Color){230, 41, 55, 128}
 #define TRANS_BLUE (Color){0, 121, 241, 128}
+#define TRANS_GREEN (Color){0, 241, 121, 128}
 
 float absf(float x);
 float maxf(float x, float y);

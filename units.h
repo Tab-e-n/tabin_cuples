@@ -20,6 +20,9 @@ typedef enum UnitState
 	STATE_ATTACK_END,
 	STATE_DEATH,
 	STATE_IDLE,
+	STATE_HEAL_COOLDOWN,
+	STATE_HEAL_START,
+	STATE_HEAL_END,
 } UnitState;
 
 typedef enum UnitType
@@ -36,6 +39,12 @@ typedef enum UnitType
 	UNIT_CLERIC,
 } UnitType;
 
+typedef enum DetectionRangeCheckType
+{
+	CHECK_CLOSEST,
+	CHECK_FURTHEST,
+} DetectionRangeCheckType;
+
 typedef struct Cup
 {
 	bool active;
@@ -50,6 +59,7 @@ typedef struct Unit
 	int health, // Current health, basic unit has 8 health
 	    max_health, // Max health, stays the same
 	    damage, // Amount of damage dealt when unit attacks
+	    heal, 
 	    incoming; // * Damage is dealt after every unit is processed, stored here
 	UnitState state;
 	float cooldown, // Base cooldown after attacking
@@ -87,10 +97,11 @@ Unit UnitInit(void);
 Unit MakeUnit(int type, Vector2 position, char direction);
 
 void UnitMove(Unit* unit, float mult);
-bool UnitDetectionRangeCheck(Unit* unit, Side* side);
+bool UnitDetectionRangeCheck(Unit* unit, Side* side, DetectionRangeCheckType type);
 bool UnitCanPass(Unit* unit, Unit* other);
 bool UnitFrontCheck(Unit* unit, Side* side);
 void UnitAttack(Unit* unit, Side* side);
+void UnitHeal(Unit* unit, Side* side);
 
 void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side);
 void UnitDamage(Unit* unit);

@@ -6,7 +6,7 @@
 Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE * (maxf(unit.range - 1.0, 0.0) + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.5));
+	area.width = CUP_SIZE * (maxf(unit.range - 1.0, 0.5) + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.0));
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
 	if(unit.direction < 0)
@@ -86,6 +86,7 @@ Unit UnitInit(void)
 	unit.health = 8;
 	unit.max_health = 8;
 	unit.damage = 2;
+	unit.heal = 0;
 	unit.incoming = 0;
 	unit.state = STATE_NULL;
 	unit.cooldown = 1.0;
@@ -131,7 +132,7 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			unit.area = 0.75;
 			unit.range = 3.5;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 3};
+			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 3.5};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -147,7 +148,7 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
-			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
+			unit.health_bar_offset = (Vector2){0, CUP_SIZE};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
@@ -243,8 +244,8 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			break;
 		case(UNIT_CANNON):
 			unit.max_health = 24;
-			unit.damage = 4;
-			unit.cooldown = 1.5;
+			unit.damage = 5;
+			unit.cooldown = 2.5;
 			unit.speed = 7.5;
 			unit.move_full = 10.0;
 			unit.move_wait = 0.0;
@@ -282,6 +283,55 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			unit.cups[0].offset = (Vector2){0, 0};
 			unit.cups[1].active = true;
 			unit.cups[1].pattern = 0;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
+			unit.cups[2].active = true;
+			unit.cups[2].pattern = 0;
+			unit.cups[2].animation = 0;
+			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
+			break;
+		case(UNIT_PIRATE):
+			unit.max_health = 24;
+			unit.damage = 2;
+			unit.cooldown = 2.0;
+			unit.speed = 20.0;
+			unit.move_full = 1.0;
+			unit.move_wait = 0.5;
+			unit.area = 1.0;
+			unit.range = 1.0;
+			unit.length = 2.0;
+			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 1;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 0;
+			unit.cups[1].animation = 0;
+			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
+			unit.cups[2].active = true;
+			unit.cups[2].pattern = 1;
+			unit.cups[2].animation = 0;
+			unit.cups[2].offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE};
+			break;
+		case(UNIT_CLERIC):
+			unit.max_health = 16;
+			unit.damage = 1;
+			unit.heal = 1;
+			unit.cooldown = 0.5;
+			unit.speed = 4.0;
+			unit.move_full = 2.0;
+			unit.move_wait = 0.5;
+			unit.area = 0.25;
+			unit.range = 3.0;
+			unit.length = 2.0;
+			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
+			unit.cups[0].active = true;
+			unit.cups[0].pattern = 1;
+			unit.cups[0].animation = 0;
+			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[1].active = true;
+			unit.cups[1].pattern = 1;
 			unit.cups[1].animation = 0;
 			unit.cups[1].offset = (Vector2){CUP_SIZE, 0};
 			unit.cups[2].active = true;
@@ -332,7 +382,7 @@ void UnitMove(Unit* unit, float mult)
 	}
 }
 
-bool UnitDetectionRangeCheck(Unit* unit, Side* side)
+bool UnitDetectionRangeCheck(Unit* unit, Side* side, DetectionRangeCheckType type)
 {
 	Rectangle detect_range = UnitDetectionArea(*unit);
 	bool detected = false;
@@ -357,7 +407,15 @@ bool UnitDetectionRangeCheck(Unit* unit, Side* side)
 					{
 						distance = 0.0;
 					}
-					if(unit->enemy_distance == -1.0 || distance < unit->enemy_distance)
+					if(unit->enemy_distance == -1.0)
+					{
+						unit->enemy_distance = distance;
+					}
+					if(type == CHECK_CLOSEST && distance < unit->enemy_distance)
+					{
+						unit->enemy_distance = distance;
+					}
+					if(type == CHECK_FURTHEST && distance > unit->enemy_distance)
 					{
 						unit->enemy_distance = distance;
 					}
@@ -372,7 +430,12 @@ bool UnitDetectionRangeCheck(Unit* unit, Side* side)
 
 bool UnitCanPass(Unit* unit, Unit* other)
 {
-	return (other->state == STATE_MOVE || other->state == STATE_IDLE) && other->speed < unit->speed;
+	return (other->state == STATE_MOVE ||
+			other->state == STATE_IDLE ||
+			other->state == STATE_HEAL_COOLDOWN ||
+			other->state == STATE_HEAL_START ||
+			other->state == STATE_HEAL_END
+			) && other->speed < unit->speed;
 }
 
 bool UnitFrontCheck(Unit* unit, Side* side)
@@ -416,6 +479,27 @@ void UnitAttack(Unit* unit, Side* side)
 	}
 }
 
+void UnitHeal(Unit* unit, Side* side)
+{
+	Rectangle hurtbox = UnitAttackArea(*unit);
+	for(int i = 0; i < MAX_UNITS; i++) 
+	{
+		Unit other = side->units[i];
+		if(other.alive != 0) for(int j = 0; j < CUPS_PER_UNIT; j++)
+		{
+			if(other.cups[j].active)
+			{
+				Rectangle hitbox = CupHitbox(other, j);
+				if(CheckCollisionRecs(hurtbox, hitbox))
+				{
+					side->units[i].incoming -= unit->heal;
+					return;
+				}
+			}
+		}
+	}
+}
+
 void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 {
 	if(unit->alive == 0)
@@ -431,11 +515,21 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 		case STATE_MOVE:
 			UnitMove(unit, 1.0);
 			break;
+		case STATE_IDLE:
+			break;
 		case STATE_COOLDOWN:
 			break;
 		case STATE_ATTACK_START:
 			break;
 		case STATE_ATTACK_END:
+			break;
+		case STATE_HEAL_COOLDOWN:
+			break;
+		case STATE_HEAL_START:
+			break;
+		case STATE_HEAL_END:
+			break;
+		case STATE_DEATH:
 			break;
 	}
 	
@@ -448,6 +542,10 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 			//TraceLog(LOG_INFO, "Attack");
 			UnitAttack(unit, enemy_side);
 		}
+		if(unit->state == STATE_HEAL_START)
+		{
+			UnitHeal(unit, friend_side);
+		}
 		if(unit->state == STATE_DEATH)
 		{
 			unit->state = STATE_NULL;
@@ -459,16 +557,29 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 			case STATE_COOLDOWN:
 				unit->state = STATE_MOVE;
 				break;
+			case STATE_HEAL_COOLDOWN:
+				unit->state = STATE_MOVE;
+				break;
 			case STATE_ATTACK_START:
 				unit->state = STATE_ATTACK_END;
 				break;
 			case STATE_ATTACK_END:
 				unit->state = STATE_COOLDOWN;
 				break;
+			case STATE_HEAL_START:
+				unit->state = STATE_HEAL_END;
+				break;
+			case STATE_HEAL_END:
+				unit->state = STATE_HEAL_COOLDOWN;
+				break;
 		}
 		if(unit->state == STATE_MOVE || unit->state == STATE_IDLE)
 		{
-			if(UnitDetectionRangeCheck(unit, enemy_side))
+			if(unit->heal > 0 && UnitDetectionRangeCheck(unit, friend_side, CHECK_FURTHEST))
+			{
+				unit->state = STATE_HEAL_START;
+			}
+			else if(unit->damage >= 0 && UnitDetectionRangeCheck(unit, enemy_side, CHECK_CLOSEST))
 			{
 				unit->state = STATE_ATTACK_START;
 			}
@@ -507,6 +618,15 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 			case STATE_ATTACK_END:
 				unit->state_time = 0.25;
 				break;
+			case STATE_HEAL_COOLDOWN:
+				unit->state_time = unit->cooldown;
+				break;
+			case STATE_HEAL_START:
+				unit->state_time = 0.25;
+				break;
+			case STATE_HEAL_END:
+				unit->state_time = 0.25;
+				break;
 		}
 	}
 }
@@ -520,6 +640,10 @@ void UnitDamage(Unit* unit)
 	}
 	unit->health -= unit->incoming;
 	unit->incoming = 0;
+	if(unit->health > unit->max_health)
+	{
+		unit->health = unit->max_health;
+	}
 	if(unit->health <= 0)
 	{
 		unit->state = STATE_DEATH;
@@ -604,6 +728,10 @@ void DrawUnitDebugAttack(Unit unit)
 	if(unit.state == STATE_ATTACK_START)
 	{
 		DrawRectangleRec(UnitAttackArea(unit), TRANS_RED);
+	}
+	if(unit.state == STATE_HEAL_START)
+	{
+		DrawRectangleRec(UnitAttackArea(unit), TRANS_GREEN);
 	}
 }
 
