@@ -45,6 +45,13 @@ typedef enum DetectionRangeCheckType
 	CHECK_FURTHEST,
 } DetectionRangeCheckType;
 
+typedef enum IdleState
+{
+	IDLE_STOP,
+	IDLE_STAND,
+	IDLE_BACKUP,
+} IdleState;
+
 typedef struct Cup
 {
 	bool active;
@@ -74,7 +81,7 @@ typedef struct Unit
 	      enemy_distance; // * How far the last detected enemy is, limited by range
 	char direction, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed
-	     idle_backup; // * When overlaping another unit, backup after standing for too long.
+	     idle_state; // * When overlaping another unit, backup and stuff.
 	Vector2 health_bar_offset;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
@@ -99,7 +106,8 @@ Unit MakeUnit(int type, Vector2 position, char direction);
 void UnitMove(Unit* unit, float mult);
 bool UnitDetectionRangeCheck(Unit* unit, Side* side, DetectionRangeCheckType type);
 bool UnitCanPass(Unit* unit, Unit* other);
-bool UnitFrontCheck(Unit* unit, Side* side);
+bool CupOverlapsUnit(Unit* unit, Rectangle hitbox);
+char UnitFrontCheck(Unit* unit, Side* side);
 void UnitAttack(Unit* unit, Side* side);
 void UnitHeal(Unit* unit, Side* side);
 

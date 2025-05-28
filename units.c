@@ -6,7 +6,7 @@
 Rectangle UnitDetectionArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
-	area.width = CUP_SIZE * (maxf(unit.range - 1.0, 0.5) + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.0));
+	area.width = CUP_SIZE * maxf(unit.range - 0.75, 0.25); // + (unit.state == STATE_IDLE ? unit.area - 0.25 : 0.0));
 	area.height = CUP_SIZE;
 	area.x = unit.position.x;
 	if(unit.direction < 0)
@@ -25,15 +25,15 @@ Rectangle UnitFrontArea(Unit unit)
 {
 	Rectangle area = (Rectangle){0};
 	area.width = CUP_SIZE * 0.125;
-	area.height = CUP_SIZE;
+	area.height = CUP_SIZE * .45;
 	area.x = unit.position.x;
 	if(unit.direction < 0)
 	{
-		area.x -= area.width + CUP_SIZE * (unit.length - 0.4675);
+		area.x -= area.width + CUP_SIZE * (unit.length - 0.49);
 	}
 	else
 	{
-		area.x += CUP_SIZE * (unit.length - 0.4675);
+		area.x += CUP_SIZE * (unit.length - 0.49);
 	}
 	area.y = unit.position.y - area.height;
 	return area;
@@ -101,7 +101,7 @@ Unit UnitInit(void)
 	unit.enemy_distance = 0.0;
 	unit.direction = 0;
 	unit.alive = 1;
-	unit.idle_backup = 0;
+	unit.idle_state = IDLE_STOP;
 	unit.health_bar_offset = (Vector2){0, 32};
 
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
@@ -136,7 +136,7 @@ Unit MakeUnit(int type, Vector2 position, char direction)
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
 			unit.cups[0].animation = 0;
-			unit.cups[0].offset = (Vector2){0, 0};
+			unit.cups[0].offset = (Vector2){0, CUP_SIZE * 0.5};
 			break;
 		case(UNIT_BASIC):
 			unit.max_health = 8;
@@ -430,17 +430,36 @@ bool UnitDetectionRangeCheck(Unit* unit, Side* side, DetectionRangeCheckType typ
 
 bool UnitCanPass(Unit* unit, Unit* other)
 {
-	return (other->state == STATE_MOVE ||
-			other->state == STATE_IDLE ||
-			other->state == STATE_HEAL_COOLDOWN ||
-			other->state == STATE_HEAL_START ||
-			other->state == STATE_HEAL_END
-			) && other->speed < unit->speed;
+	return other->idle_state != IDLE_STAND &&
+		other->speed < unit->speed && (
+		other->state == STATE_MOVE ||
+		other->state == STATE_IDLE ||
+		other->state == STATE_HEAL_COOLDOWN ||
+		other->state == STATE_HEAL_START ||
+		other->state == STATE_HEAL_END
+		);
 }
 
-bool UnitFrontCheck(Unit* unit, Side* side)
+bool CupOverlapsUnit(Unit* unit, Rectangle hitbox)
+{
+	for(int i = 0; i < CUPS_PER_UNIT; i++)
+	{
+		if(unit->cups[i].active)
+		{
+			Rectangle unitbox = CupHitbox(*unit, i);
+			if(CheckCollisionRecs(unitbox, hitbox))
+			{
+				return true;
+			}
+		}
+	}
+	return false;
+}
+
+char UnitFrontCheck(Unit* unit, Side* side)
 {
 	Rectangle detect_range = UnitFrontArea(*unit);
+	char result = IDLE_STOP;
 	for(int i = 0; i < MAX_UNITS; i++) 
 	{
 		Unit other = side->units[i];
@@ -451,12 +470,16 @@ bool UnitFrontCheck(Unit* unit, Side* side)
 				Rectangle hitbox = CupHitbox(other, j);
 				if(CheckCollisionRecs(detect_range, hitbox))
 				{
-					return true;
+					result = IDLE_STAND;
+					if(CupOverlapsUnit(unit, hitbox))
+					{
+						return IDLE_BACKUP;
+					}
 				}
 			}
 		}
 	}
-	return false;
+	return result;
 }
 
 void UnitAttack(Unit* unit, Side* side)
@@ -506,16 +529,16 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 	{
 		return;
 	}
-	if(unit->idle_backup >= 10)
-	{
-		UnitMove(unit, -1.0);
-	}
-	else switch(unit->state)
+	switch(unit->state)
 	{
 		case STATE_MOVE:
 			UnitMove(unit, 1.0);
 			break;
 		case STATE_IDLE:
+			if(unit->idle_state == IDLE_BACKUP)
+			{
+				UnitMove(unit, -1.0);
+			}
 			break;
 		case STATE_COOLDOWN:
 			break;
@@ -583,20 +606,24 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 			{
 				unit->state = STATE_ATTACK_START;
 			}
-			else if(UnitFrontCheck(unit, friend_side))
+			else 
 			{
-				unit->state = STATE_IDLE;
-				unit->idle_backup += 1;
-			}
-			else
-			{
-				unit->state = STATE_MOVE;
+				char result = UnitFrontCheck(unit, friend_side);
+				if(result)
+				{
+					unit->state = STATE_IDLE;
+					unit->idle_state = result;
+				}
+				else
+				{
+					unit->state = STATE_MOVE;
+				}
 			}
 		}
 		// STATE START
 		if(unit->state == STATE_MOVE)
 		{
-			unit->idle_backup = 0;
+			unit->idle_state = IDLE_STOP;
 		}
 		switch(unit->state)
 		{

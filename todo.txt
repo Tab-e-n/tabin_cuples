@@ -1,12 +1,12 @@
 
-remove idle_backup, instead t should be base on if they overlap
-
 Making units
+Resources
 Worker units
 
 Menu
 Levels
 
+Army command that stops your cups at a certain position, so they can reorganize
 Random cooldown time variance
 
 Buffs?

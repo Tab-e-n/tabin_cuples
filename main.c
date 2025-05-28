@@ -24,10 +24,12 @@ int main(void)
 	Side left = SideInit(LEFT_START_POS, 1);
 	Side right = SideInit(RIGHT_START_POS, -1);
 
-	SpawnUnit(UNIT_CLERIC, &left);
-	SpawnUnit(UNIT_PILLAR, &left);
-	SpawnUnit(UNIT_CLERIC, &right);
-	SpawnUnit(UNIT_PILLAR, &right);
+	SpawnUnit(UNIT_BASIC, &left);
+	SpawnUnit(UNIT_THROWER, &left);
+	SpawnUnit(UNIT_TALL, &left);
+	SpawnUnit(UNIT_BASIC, &right);
+	SpawnUnit(UNIT_THROWER, &right);
+	SpawnUnit(UNIT_TALL, &right);
 
 	bool processing = true;
 	char win = 0;
