@@ -101,7 +101,7 @@ Rectangle CupHitbox(Unit unit, int cup_id);
 Vector2 CupPosition(Unit unit, int cup_id);
 
 Unit UnitInit(void);
-Unit MakeUnit(int type, Vector2 position, char direction);
+Unit MakeUnit(UnitType type, Vector2 position, char direction);
 
 void UnitMove(Unit* unit, float mult);
 bool UnitDetectionRangeCheck(Unit* unit, Side* side, DetectionRangeCheckType type);
@@ -115,7 +115,7 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side);
 void UnitDamage(Unit* unit);
 
 Side SideInit(Vector2 start_pos, char direction);
-bool SpawnUnit(int type, Side* side);
+bool SpawnUnit(UnitType type, Side* side);
 char BaseAlive(Side* side);
 
 void DrawUnitDebug(Unit unit);

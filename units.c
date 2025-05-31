@@ -113,7 +113,7 @@ Unit UnitInit(void)
 	return unit;
 }
 
-Unit MakeUnit(int type, Vector2 position, char direction)
+Unit MakeUnit(UnitType type, Vector2 position, char direction)
 {
 	Unit unit = UnitInit();
 	unit.position = position;
@@ -537,7 +537,7 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 		case STATE_IDLE:
 			if(unit->idle_state == IDLE_BACKUP)
 			{
-				UnitMove(unit, -1.0);
+				UnitMove(unit, -1.25);
 			}
 			break;
 		case STATE_COOLDOWN:
@@ -689,7 +689,7 @@ Side SideInit(Vector2 start_pos, char direction)
 	return side;
 }
 
-bool SpawnUnit(int type, Side* side)
+bool SpawnUnit(UnitType	type, Side* side)
 {
 	int reps = 0;
 	while(reps < MAX_UNITS && side->units[side->current_unit].alive)
