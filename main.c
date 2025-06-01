@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include "cuplib.h"
 #include "units.h"
+#include "summon.h"
 
 // Temporary randomness
 #include <stdlib.h>
@@ -18,8 +19,8 @@ int main(void)
 	camera.offset = (Vector2){SCREEN_SIZE.x * 0.5, SCREEN_SIZE.y * 0.5};
 	camera.zoom = 1.0;
 
-	const Vector2 LEFT_START_POS = (Vector2){-256, 128}; 
-	const Vector2 RIGHT_START_POS = (Vector2){256, 128};
+	const Vector2 LEFT_START_POS = (Vector2){-256, 196}; 
+	const Vector2 RIGHT_START_POS = (Vector2){256, 196};
 
 	Side left = SideInit(LEFT_START_POS, 1);
 	Side right = SideInit(RIGHT_START_POS, -1);
@@ -38,6 +39,8 @@ int main(void)
 
 	while(!WindowShouldClose())
 	{
+
+		Vector2 mouse_pos = GetMousePosition();
 
 		if(processing)
 		{
@@ -104,6 +107,12 @@ int main(void)
 			DrawHealthBar(left.units[i]);
 			DrawHealthBar(right.units[i]);
 		}
+		Vector2 grid_pos = (Vector2){0, 0};
+		DrawStructureGrid(grid_pos, 1);
+		Vector2 selected = StructureMousePos(grid_pos, 1, mouse_pos);
+		selected.x = selected.x * CUP_SIZE * 0.5;
+		selected.y = selected.y * CUP_SIZE;
+		DrawPixelV(selected, BLACK);
 		EndMode2D();
 		EndDrawing();
 

@@ -4,6 +4,7 @@
 #include <raylib.h>
 
 #define SCREEN_SIZE (Vector2){640, 480}
+#define SCREEN_SIZE_HALF (Vector2){320, 240}
 #define FRAME 0.016
 
 #define TRANS_PURPLE (Color){200, 122, 255, 128}
