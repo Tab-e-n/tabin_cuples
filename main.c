@@ -37,10 +37,21 @@ int main(void)
 	srand(time(0));
 	float tempo_spawn_timer = 0.0;
 
+	const Vector2 GRID_POSITION = (Vector2){0, 0};
+	Structure structure = StructureInit();
+
 	while(!WindowShouldClose())
 	{
 
 		Vector2 mouse_pos = GetMousePosition();
+		if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
+		{
+			StructureAddCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos), 1);
+		}
+		if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
+		{
+			StructureRemoveCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos));
+		}
 
 		if(processing)
 		{
@@ -107,12 +118,8 @@ int main(void)
 			DrawHealthBar(left.units[i]);
 			DrawHealthBar(right.units[i]);
 		}
-		Vector2 grid_pos = (Vector2){0, 0};
-		DrawStructureGrid(grid_pos, 1);
-		Vector2 selected = StructureMousePos(grid_pos, 1, mouse_pos);
-		selected.x = selected.x * CUP_SIZE * 0.5;
-		selected.y = selected.y * CUP_SIZE;
-		DrawPixelV(selected, BLACK);
+		DrawStructureGrid(GRID_POSITION, 1);
+		DrawStructureDebug(structure, GRID_POSITION, 1);
 		EndMode2D();
 		EndDrawing();
 
