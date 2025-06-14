@@ -17,6 +17,13 @@ typedef struct Structure
 	     grid[GRID_AMOUNT];
 } Structure;
 
+typedef struct UnitCode
+{
+	char codes[CUPS_PER_UNIT];
+	// 000000 0     0
+	// pos    hi/lo placed
+} UnitCode;
+
 
 Structure StructureInit(void);
 
@@ -25,7 +32,8 @@ int StructureCupGridID(Vector2 pos);
 bool StructureAddCup(Structure* structure, Vector2 pos, char cup);
 bool StructureRemoveCup(Structure* structure, Vector2 pos);
 
-UnitType InterpretPlayerStructure(Structure structure);
+char StructureCupToCode(Structure structure, int cup, int start_cup);
+UnitCode InterpretPlayerStructure(Structure structure);
 
 void DrawStructureGrid(Vector2 pos, float scale);
 void DrawStructureDebug(Structure structure, Vector2 pos, float scale);
