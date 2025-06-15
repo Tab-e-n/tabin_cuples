@@ -178,6 +178,44 @@ UnitCode InterpretPlayerStructure(Structure structure)
 	return unit;
 }
 
+bool UnitCodeStart(char code)
+{
+	return (code & 1) && (code >> 2 == 0);
+}
+
+bool UnitCodeContinue(char code)
+{
+	return code >> 2 != 0;
+}
+
+void SpawnUnitFromCode(UnitCode unit, Side* side)
+{
+	char current_code = 0;
+	while(current_code < CUPS_PER_UNIT)
+	{
+		char code = unit.codes[current_code];
+		if(UnitCodeStart(code))
+		{
+			long long int full_code = code;
+			current_code++;
+			if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
+			while(current_code < CUPS_PER_UNIT && UnitCodeContinue(code))
+			{
+				full_code = full_code << 8;
+				full_code += code;
+				current_code++;
+				if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
+			}
+			TraceLog(LOG_INFO, "%i", full_code);
+			//SpawnUnit(type, side);
+		}
+		else
+		{
+			current_code = CUPS_PER_UNIT;
+		}
+	}
+}
+
 void DrawStructureGrid(Vector2 pos, float scale)
 {
 	pos.x -= CUP_SIZE * 2.5;

@@ -35,6 +35,10 @@ bool StructureRemoveCup(Structure* structure, Vector2 pos);
 char StructureCupToCode(Structure structure, int cup, int start_cup);
 UnitCode InterpretPlayerStructure(Structure structure);
 
+bool UnitCodeStart(char code);
+bool UnitCodeContinue(char code);
+void SpawnUnitFromCode(UnitCode unit, Side* side);
+
 void DrawStructureGrid(Vector2 pos, float scale);
 void DrawStructureDebug(Structure structure, Vector2 pos, float scale);
 

@@ -52,6 +52,11 @@ int main(void)
 		{
 			StructureRemoveCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos));
 		}
+		if(IsKeyPressed(KEY_ENTER))
+		{
+			UnitCode unitcode = InterpretPlayerStructure(structure);
+			SpawnUnitFromCode(unitcode, &left);
+		}
 
 		if(processing)
 		{
