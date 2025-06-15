@@ -29,6 +29,7 @@ Structure StructureInit(void);
 
 Vector2 StructureMousePos(Vector2 screen_pos, float scale, Vector2 mouse_pos);
 int StructureCupGridID(Vector2 pos);
+bool StructureFlipCup(Structure* structure, int id);
 bool StructureAddCup(Structure* structure, Vector2 pos, char cup);
 bool StructureRemoveCup(Structure* structure, Vector2 pos);
 

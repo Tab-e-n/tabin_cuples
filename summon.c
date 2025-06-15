@@ -45,25 +45,47 @@ int StructureCupGridID(Vector2 pos)
 	return pos.x + pos.y * GRID_SIZE.x;
 }
 
+bool StructureFlipCup(Structure* structure, int id)
+{
+	if(structure->grid[id] == 1)
+	{
+		structure->grid[id] = 2;
+		return true;
+	}
+	if(structure->grid[id] == 2)
+	{
+		structure->grid[id] = 1;
+		return true;
+	}
+	return false;
+}
+
 bool StructureAddCup(Structure* structure, Vector2 pos, char cup)
 {
-	if(structure->cups_present >= 5)
-	{
-		return false;
-	}
 	int i = StructureCupGridID(pos);
-	if(structure->grid[i + 1] != 0 || structure->grid[i - 1] != 0)
+	if(structure->grid[i + 1] != 0)
 	{
+		StructureFlipCup(structure, i + 1);
 		return false;
 	}
-	if(structure->grid[i] == 0)
+	else if(structure->grid[i - 1] != 0)
 	{
+		StructureFlipCup(structure, i - 1);
+		return false;
+	}
+	else if(structure->grid[i] == 0)
+	{
+		if(structure->cups_present >= 5)
+		{
+			return false;
+		}
 		structure->grid[i] = cup;
 		structure->cups_present++;
 		return true;
 	}
 	else
 	{
+		StructureFlipCup(structure, i);
 		return false;
 	}
 }
@@ -95,7 +117,7 @@ bool StructureRemoveCup(Structure* structure, Vector2 pos)
 
 char StructureCupToCode(Structure structure, int cup, int start_cup)
 {
-	char code = structure.grid[cup] == 0 ? 0b01 : 0b11;
+	char code = structure.grid[cup] == 1 ? 0b01 : 0b11;
 	code += (cup - start_cup) << 2;
 	return code;
 }
