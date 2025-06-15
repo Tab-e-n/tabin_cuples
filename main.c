@@ -25,12 +25,14 @@ int main(void)
 	Side left = SideInit(LEFT_START_POS, 1);
 	Side right = SideInit(RIGHT_START_POS, -1);
 
-	SpawnUnit(UNIT_BASIC, &left);
-	SpawnUnit(UNIT_THROWER, &left);
-	SpawnUnit(UNIT_TALL, &left);
-	SpawnUnit(UNIT_BASIC, &right);
-	SpawnUnit(UNIT_THROWER, &right);
-	SpawnUnit(UNIT_TALL, &right);
+	/*
+	SpawnUnit(UNIT_BASIC, &left, 0);
+	SpawnUnit(UNIT_THROWER, &left, 0);
+	SpawnUnit(UNIT_TALL, &left, 0);
+	SpawnUnit(UNIT_BASIC, &right, 0);
+	SpawnUnit(UNIT_THROWER, &right, 0);
+	SpawnUnit(UNIT_TALL, &right, 0);
+	*/
 
 	bool processing = true;
 	char win = 0;
@@ -78,8 +80,8 @@ int main(void)
 				char right_alive = BaseAlive(&right);
 				if(left_alive && right_alive)
 				{
-					SpawnUnit(rand()%7+1, &left);
-					SpawnUnit(rand()%7+1, &right);
+					//SpawnUnit(rand()%7+1, &left, 0);
+					SpawnUnit(rand()%7+1, &right, 0);
 				}
 				else
 				{

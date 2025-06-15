@@ -115,7 +115,7 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side);
 void UnitDamage(Unit* unit);
 
 Side SideInit(Vector2 start_pos, char direction);
-bool SpawnUnit(UnitType type, Side* side);
+bool SpawnUnit(UnitType type, Side* side, float offset);
 char BaseAlive(Side* side);
 
 void DrawUnitDebug(Unit unit);

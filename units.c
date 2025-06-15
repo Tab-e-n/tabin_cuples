@@ -685,11 +685,11 @@ Side SideInit(Vector2 start_pos, char direction)
 	side.spawn_position = start_pos;
 	side.direction = direction;
 	side.current_unit = 0;
-	SpawnUnit(UNIT_BASE, &side);
+	SpawnUnit(UNIT_BASE, &side, 0);
 	return side;
 }
 
-bool SpawnUnit(UnitType	type, Side* side)
+bool SpawnUnit(UnitType	type, Side* side, float offset)
 {
 	int reps = 0;
 	while(reps < MAX_UNITS && side->units[side->current_unit].alive)
@@ -703,7 +703,9 @@ bool SpawnUnit(UnitType	type, Side* side)
 	}
 	if(reps < MAX_UNITS)
 	{
-		side->units[side->current_unit] = MakeUnit(type, side->spawn_position, side->direction);
+		Vector2 spawn_pos = side->spawn_position;
+		spawn_pos.x += offset * side->direction;
+		side->units[side->current_unit] = MakeUnit(type, spawn_pos, side->direction);
 		return true;
 	}
 	else
