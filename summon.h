@@ -9,6 +9,7 @@
 
 #define GRID_SIZE (Vector2){10, 5}
 #define GRID_AMOUNT 50		// GRID_SIZE.x * GRID_SIZE.y
+#define CUPS_PER_STRUCTURE 8
 
 
 typedef struct Structure
@@ -19,7 +20,7 @@ typedef struct Structure
 
 typedef struct UnitCode
 {
-	unsigned char codes[CUPS_PER_UNIT];
+	unsigned char codes[CUPS_PER_STRUCTURE];
 	// 000000 0     0
 	// pos    hi/lo placed
 } UnitCode;

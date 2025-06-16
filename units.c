@@ -104,6 +104,9 @@ Unit UnitInit(void)
 	unit.idle_state = IDLE_STOP;
 	unit.move_chain = 0;
 	unit.move_chain_goal = 3;
+	unit.knockback = 0.0;
+	unit.knockback_given = 0.0;
+	unit.stun = 0.0;
 	unit.health_bar_offset = (Vector2){0, 32};
 
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
@@ -134,6 +137,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 0.75;
 			unit.range = 3.5;
 			unit.length = 1.0;
+			unit.move_chain_goal = -1;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 3.5};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -150,6 +156,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -166,6 +175,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 2.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 1;
@@ -186,6 +198,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 0.75;
 			unit.range = 2.25;
 			unit.length = 1.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -203,9 +218,12 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.speed = 14.5;
 			unit.move_full = 1.0;
 			unit.move_wait = 0.35;
-			unit.area = 3.0;
+			unit.area = 2.8;
 			unit.range = 1.0;
 			unit.length = 1.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, CUP_SIZE * 3};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -230,6 +248,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 2.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -254,6 +275,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 0.75;
 			unit.range = 2.75;
 			unit.length = 2.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -278,6 +302,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 1.0;
 			unit.range = 1.25;
 			unit.length = 2.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.5;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 1;
@@ -294,14 +321,17 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			break;
 		case(UNIT_PIRATE):
 			unit.max_health = 24;
-			unit.damage = 2;
-			unit.cooldown = 2.0;
-			unit.speed = 20.0;
-			unit.move_full = 1.0;
-			unit.move_wait = 0.5;
-			unit.area = 1.0;
-			unit.range = 1.0;
+			unit.damage = 3;
+			unit.cooldown = 4.0;
+			unit.speed = 19.0;
+			unit.move_full = 2.0;
+			unit.move_wait = 1.5;
+			unit.area = 0.5;
+			unit.range = 1.325;
 			unit.length = 2.0;
+			unit.move_chain_goal = 1;
+			unit.knockback_given = 1.5;
+			unit.stun = 2.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 1;
@@ -318,15 +348,18 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			break;
 		case(UNIT_CLERIC):
 			unit.max_health = 16;
-			unit.damage = 1;
+			unit.damage = 2;
 			unit.heal = 1;
-			unit.cooldown = 0.75;
-			unit.speed = 4.0;
-			unit.move_full = 2.0;
-			unit.move_wait = 0.5;
+			unit.cooldown = 1.50;
+			unit.speed = 7.0;
+			unit.move_full = 1.0;
+			unit.move_wait = 0.2;
 			unit.area = 0.25;
-			unit.range = 3.0;
+			unit.range = 1.0;
 			unit.length = 2.0;
+			unit.move_chain_goal = 0;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){CUP_SIZE * 0.5, CUP_SIZE * 2};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 1;
@@ -351,6 +384,9 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.area = 1.0;
 			unit.range = 1.0;
 			unit.length = 1.0;
+			unit.move_chain_goal = 3;
+			unit.knockback_given = 0.0;
+			unit.stun = 0.0;
 			unit.health_bar_offset = (Vector2){0, 32};
 			unit.cups[0].active = true;
 			unit.cups[0].pattern = 0;
@@ -377,7 +413,7 @@ void UnitMove(Unit* unit, float mult)
 	if(unit->move_time > unit->move_full)
 	{
 		unit->move_time = 0;
-		if(unit->move_chain < unit->move_chain_goal)
+		if(unit->move_chain_goal != -1 && unit->move_chain < unit->move_chain_goal)
 		{
 			unit->move_chain++;
 		}
@@ -502,6 +538,15 @@ void UnitAttack(Unit* unit, Side* side)
 				if(CheckCollisionRecs(hurtbox, hitbox))
 				{
 					side->units[i].incoming += unit->damage;
+					if(side->units[i].speed != 0.0)
+					{
+						side->units[i].knockback += unit->knockback_given;
+					}
+					if(unit->stun > 0.0)
+					{
+						side->units[i].state = STATE_STUN;
+						side->units[i].state_time = unit->stun;
+					}
 				}
 			}
 		}
@@ -535,6 +580,15 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 	{
 		return;
 	}
+	if(unit->knockback > 0)
+	{
+		unit->knockback -= FRAME;
+		if(unit->knockback < 0)
+		{
+			unit->knockback = 0;
+		}
+		unit->position.x -= unit->direction * FRAME * unit->knockback * 16.0;
+	}
 	switch(unit->state)
 	{
 		case STATE_MOVE:
@@ -563,6 +617,8 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 		case STATE_HEAL_END:
 			break;
 		case STATE_DEATH:
+			break;
+		case STATE_STUN:
 			break;
 	}
 	
@@ -605,6 +661,8 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 			case STATE_HEAL_END:
 				unit->state = STATE_HEAL_COOLDOWN;
 				break;
+			case STATE_STUN:
+				unit->state = STATE_MOVE;
 		}
 		if(unit->state == STATE_MOVE || unit->state == STATE_IDLE)
 		{

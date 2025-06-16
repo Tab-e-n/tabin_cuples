@@ -37,9 +37,9 @@ int main(void)
 	bool processing = true;
 	char win = 0;
 	float resource_timer = 0.0;
-	char resource = 1;
+	char resource = 3;
 	srand(time(0));
-	float tempo_spawn_timer = 0.0;
+	float tempo_spawn_timer = 20.0;
 
 	const Vector2 GRID_POSITION = (Vector2){0, 0};
 	Structure structure = StructureInit();
@@ -89,15 +89,14 @@ int main(void)
 				UnitDamage(&right.units[i]);
 			}
 			tempo_spawn_timer += .016;
-			if(tempo_spawn_timer > 30.0)
+			if(tempo_spawn_timer > 27.5)
 			{
 				tempo_spawn_timer = 0.0;
 				char left_alive = BaseAlive(&left);
 				char right_alive = BaseAlive(&right);
 				if(left_alive && right_alive)
 				{
-					//SpawnUnit(rand()%7+1, &left, 0);
-					SpawnUnit(rand()%7+1, &right, 0);
+					SpawnUnit(rand()%8+2, &right, 0);
 				}
 				else
 				{

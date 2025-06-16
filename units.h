@@ -23,6 +23,7 @@ typedef enum UnitState
 	STATE_HEAL_COOLDOWN,
 	STATE_HEAL_START,
 	STATE_HEAL_END,
+	STATE_STUN,
 } UnitState;
 
 typedef enum UnitType
@@ -78,7 +79,10 @@ typedef struct Unit
 	      length, // How many cups long is the unit
 	      state_time, // * Amount of time until the state ends
 	      move_time,
-	      enemy_distance; // * How far the last detected enemy is, limited by range
+	      enemy_distance, // * How far the last detected enemy is, limited by range
+	      knockback,
+	      knockback_given,
+	      stun;
 	char direction, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed
 	     idle_state, // * When overlaping another unit, backup and stuff.

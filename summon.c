@@ -75,7 +75,7 @@ bool StructureAddCup(Structure* structure, Vector2 pos, unsigned char cup)
 	}
 	else if(structure->grid[i] == 0)
 	{
-		if(structure->cups_present >= 5)
+		if(structure->cups_present >= CUPS_PER_STRUCTURE)
 		{
 			return false;
 		}
@@ -150,9 +150,9 @@ UnitCode InterpretPlayerStructure(Structure structure)
 			 * go through array and make UnitCode
 			 * go through array and remove found cups from structure
 			 * */
-			unsigned char found_cups[CUPS_PER_UNIT], 
-				      cup_types[CUPS_PER_UNIT];
-			for(int j = 0; j < CUPS_PER_UNIT; j++)
+			unsigned char found_cups[CUPS_PER_STRUCTURE], 
+				      cup_types[CUPS_PER_STRUCTURE];
+			for(int j = 0; j < CUPS_PER_STRUCTURE; j++)
 			{
 				found_cups[j] = -1;
 			}
@@ -161,10 +161,10 @@ UnitCode InterpretPlayerStructure(Structure structure)
 			structure.grid[i] = 0;
 			structure.cups_present--;
 			unsigned char current_cup = 0, cup_amount = 1;
-			while(current_cup < CUPS_PER_UNIT)
+			while(current_cup < CUPS_PER_STRUCTURE)
 			{
 				unsigned char current_i = found_cups[current_cup];
-				if(current_i == -1 || cup_amount >= CUPS_PER_UNIT)
+				if(current_i == -1 || cup_amount >= CUPS_PER_STRUCTURE)
 				{
 				}
 				else if(current_i + GRID_SIZE.x >= GRID_AMOUNT)
@@ -175,7 +175,7 @@ UnitCode InterpretPlayerStructure(Structure structure)
 					current_i += GRID_SIZE.x;
 					for(int j = current_i - 1; j <= current_i + 1; j++)
 					{
-						if(cup_amount >= CUPS_PER_UNIT)
+						if(cup_amount >= CUPS_PER_STRUCTURE)
 						{
 						}
 						else if(structure.grid[j] != 0)
@@ -220,7 +220,7 @@ int SpawnUnitFromCode(UnitCode unit, Side* side)
 	unsigned char current_code = 0, 
 		      unit_count = 0;
 	int return_cost = 0;
-	while(current_code < CUPS_PER_UNIT)
+	while(current_code < CUPS_PER_STRUCTURE)
 	{
 		unsigned char code = unit.codes[current_code];
 		if(UnitCodeStart(code))
@@ -228,15 +228,15 @@ int SpawnUnitFromCode(UnitCode unit, Side* side)
 			unsigned long int full_code = code;
 			current_code++;
 			return_cost++;
-			if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
-			while(current_code < CUPS_PER_UNIT && UnitCodeContinue(code))
+			if(current_code < CUPS_PER_STRUCTURE) code = unit.codes[current_code];
+			while(current_code < CUPS_PER_STRUCTURE && UnitCodeContinue(code))
 			{
 				//TraceLog(LOG_INFO, "%i: %x", current_code, code);
 				full_code = full_code << 8;
 				full_code += code;
 				current_code++;
 				return_cost++;
-				if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
+				if(current_code < CUPS_PER_STRUCTURE) code = unit.codes[current_code];
 			}
 			TraceLog(LOG_INFO, "%lx", full_code);
 			float off = unit_count * 16;
@@ -284,7 +284,7 @@ int SpawnUnitFromCode(UnitCode unit, Side* side)
 		}
 		else
 		{
-			current_code = CUPS_PER_UNIT;
+			current_code = CUPS_PER_STRUCTURE;
 		}
 	}
 	return return_cost;
