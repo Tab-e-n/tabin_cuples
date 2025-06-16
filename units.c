@@ -102,6 +102,8 @@ Unit UnitInit(void)
 	unit.direction = 0;
 	unit.alive = 1;
 	unit.idle_state = IDLE_STOP;
+	unit.move_chain = 0;
+	unit.move_chain_goal = 3;
 	unit.health_bar_offset = (Vector2){0, 32};
 
 	for(int i = 0; i < CUPS_PER_UNIT; i++)
@@ -124,8 +126,8 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 	{
 		case(UNIT_BASE):
 			unit.max_health = 80;
-			unit.damage = 2;
-			unit.cooldown = 3.0;
+			unit.damage = 1;
+			unit.cooldown = 1.75;
 			unit.speed = 0.0;
 			unit.move_full = 1.0;
 			unit.move_wait = 0.25;
@@ -318,7 +320,7 @@ Unit MakeUnit(UnitType type, Vector2 position, char direction)
 			unit.max_health = 16;
 			unit.damage = 1;
 			unit.heal = 1;
-			unit.cooldown = 0.5;
+			unit.cooldown = 0.75;
 			unit.speed = 4.0;
 			unit.move_full = 2.0;
 			unit.move_wait = 0.5;
@@ -375,6 +377,10 @@ void UnitMove(Unit* unit, float mult)
 	if(unit->move_time > unit->move_full)
 	{
 		unit->move_time = 0;
+		if(unit->move_chain < unit->move_chain_goal)
+		{
+			unit->move_chain++;
+		}
 	}
 	else if(unit->move_time > unit->move_wait)
 	{
@@ -533,6 +539,10 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 	{
 		case STATE_MOVE:
 			UnitMove(unit, 1.0);
+			if(unit->move_time == 0 && unit->move_chain >= unit->move_chain_goal)
+			{
+				unit->incoming -= 1;
+			}
 			break;
 		case STATE_IDLE:
 			if(unit->idle_state == IDLE_BACKUP)
@@ -625,6 +635,10 @@ void UnitProcess(Unit* unit, Side* enemy_side, Side* friend_side)
 		{
 			unit->idle_state = IDLE_STOP;
 		}
+		else
+		{
+			unit->move_chain = 0;
+		}
 		switch(unit->state)
 		{
 			case STATE_NULL:
@@ -665,16 +679,20 @@ void UnitDamage(Unit* unit)
 		unit->incoming = 0;
 		return;
 	}
-	unit->health -= unit->incoming;
-	unit->incoming = 0;
-	if(unit->health > unit->max_health)
+	if(unit->incoming != 0)
 	{
-		unit->health = unit->max_health;
-	}
-	if(unit->health <= 0)
-	{
-		unit->state = STATE_DEATH;
-		unit->state_time = 1.0;
+		unit->health -= unit->incoming;
+		unit->incoming = 0;
+		if(unit->health > unit->max_health)
+		{
+			unit->health = unit->max_health;
+		}
+		if(unit->health <= 0)
+		{
+			unit->state = STATE_DEATH;
+			unit->state_time = 1.0;
+		}
+		unit->move_chain = 0;
 	}
 	//TraceLog(LOG_INFO, "%i", unit->health);
 }

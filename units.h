@@ -81,7 +81,9 @@ typedef struct Unit
 	      enemy_distance; // * How far the last detected enemy is, limited by range
 	char direction, // 1 (player) or -1 (opponent)
 	     alive, // * Is unit alive and should it be processed
-	     idle_state; // * When overlaping another unit, backup and stuff.
+	     idle_state, // * When overlaping another unit, backup and stuff.
+	     move_chain,
+	     move_chain_goal;
 	Vector2 health_bar_offset;
 	Cup cups[CUPS_PER_UNIT];
 } Unit;
