@@ -36,6 +36,8 @@ int main(void)
 
 	bool processing = true;
 	char win = 0;
+	float resource_timer = 0.0;
+	char resource = 1;
 	srand(time(0));
 	float tempo_spawn_timer = 0.0;
 
@@ -48,16 +50,30 @@ int main(void)
 		Vector2 mouse_pos = GetMousePosition();
 		if(IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
 		{
-			StructureAddCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos), 1);
+			if(resource > 0)
+			{
+				if(StructureAddCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos), 1))
+				{
+					resource--;
+				}
+			}
+			else
+			{
+				StructureFlipCup(&structure, StructureCupGridID(StructureMousePos(GRID_POSITION, 1, mouse_pos)));
+			}
 		}
 		if(IsMouseButtonPressed(MOUSE_BUTTON_RIGHT))
 		{
-			StructureRemoveCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos));
+			if(StructureRemoveCup(&structure, StructureMousePos(GRID_POSITION, 1, mouse_pos)))
+			{
+				resource++;
+			}
 		}
 		if(IsKeyPressed(KEY_ENTER))
 		{
 			UnitCode unitcode = InterpretPlayerStructure(structure);
-			SpawnUnitFromCode(unitcode, &left);
+			resource += SpawnUnitFromCode(unitcode, &left);
+			structure = StructureInit();
 		}
 
 		if(processing)
@@ -73,7 +89,7 @@ int main(void)
 				UnitDamage(&right.units[i]);
 			}
 			tempo_spawn_timer += .016;
-			if(tempo_spawn_timer > 20.0)
+			if(tempo_spawn_timer > 30.0)
 			{
 				tempo_spawn_timer = 0.0;
 				char left_alive = BaseAlive(&left);
@@ -88,6 +104,12 @@ int main(void)
 					processing = false;
 					win = left_alive - right_alive;
 				}
+			}
+			resource_timer += .016;
+			if(resource_timer > 10.0)
+			{
+				resource++;
+				resource_timer = 0.0;
 			}
 		}
 
@@ -127,6 +149,7 @@ int main(void)
 		}
 		DrawStructureGrid(GRID_POSITION, 1);
 		DrawStructureDebug(structure, GRID_POSITION, 1);
+		DrawText(TextFormat("%i", resource), GRID_POSITION.x, GRID_POSITION.y - 128, 16, BLACK);
 		EndMode2D();
 		EndDrawing();
 

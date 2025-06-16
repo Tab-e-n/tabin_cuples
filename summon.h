@@ -38,7 +38,7 @@ UnitCode InterpretPlayerStructure(Structure structure);
 
 bool UnitCodeStart(unsigned char code);
 bool UnitCodeContinue(unsigned char code);
-void SpawnUnitFromCode(UnitCode unit, Side* side);
+int SpawnUnitFromCode(UnitCode unit, Side* side);
 
 void DrawStructureGrid(Vector2 pos, float scale);
 void DrawStructureDebug(Structure structure, Vector2 pos, float scale);

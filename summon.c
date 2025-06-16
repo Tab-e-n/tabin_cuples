@@ -215,10 +215,11 @@ bool UnitCodeContinue(unsigned char code)
 	return code >> 2 != 0;
 }
 
-void SpawnUnitFromCode(UnitCode unit, Side* side)
+int SpawnUnitFromCode(UnitCode unit, Side* side)
 {
 	unsigned char current_code = 0, 
 		      unit_count = 0;
+	int return_cost = 0;
 	while(current_code < CUPS_PER_UNIT)
 	{
 		unsigned char code = unit.codes[current_code];
@@ -226,6 +227,7 @@ void SpawnUnitFromCode(UnitCode unit, Side* side)
 		{
 			unsigned long int full_code = code;
 			current_code++;
+			return_cost++;
 			if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
 			while(current_code < CUPS_PER_UNIT && UnitCodeContinue(code))
 			{
@@ -233,6 +235,7 @@ void SpawnUnitFromCode(UnitCode unit, Side* side)
 				full_code = full_code << 8;
 				full_code += code;
 				current_code++;
+				return_cost++;
 				if(current_code < CUPS_PER_UNIT) code = unit.codes[current_code];
 			}
 			TraceLog(LOG_INFO, "%lx", full_code);
@@ -241,30 +244,39 @@ void SpawnUnitFromCode(UnitCode unit, Side* side)
 			{
 				case(0x1):
 					SpawnUnit(UNIT_BASIC, side, off);
+					return_cost -= 1;
 					break;
 				case(0x12b):
 					SpawnUnit(UNIT_TALL, side, off);
+					return_cost -= 2;
 					break;
 				case(0x329):
 					SpawnUnit(UNIT_THROWER, side, off);
+					return_cost -= 2;
 					break;
 				case(0x12b51):
 					SpawnUnit(UNIT_PILLAR, side, off);
+					return_cost -= 3;
 					break;
 				case(0x1252d):
 					SpawnUnit(UNIT_HORSE, side, off);
+					return_cost -= 3;
 					break;
 				case(0x3252d):
 					SpawnUnit(UNIT_CANNON, side, off);
+					return_cost -= 3;
 					break;
 				case(0x1272d):
 					SpawnUnit(UNIT_VETERAN, side, off);
+					return_cost -= 3;
 					break;
 				case(0x3272d):
 					SpawnUnit(UNIT_PIRATE, side, off);
+					return_cost -= 3;
 					break;
 				case(0x1272f):
 					SpawnUnit(UNIT_CLERIC, side, off);
+					return_cost -= 3;
 					break;
 			}
 			unit_count++;
@@ -275,6 +287,7 @@ void SpawnUnitFromCode(UnitCode unit, Side* side)
 			current_code = CUPS_PER_UNIT;
 		}
 	}
+	return return_cost;
 }
 
 void DrawStructureGrid(Vector2 pos, float scale)
